@@ -1,0 +1,11 @@
+{
+  "name": "دفتر الحساب",
+  "short_name": "الحساب",
+  "start_url": "../",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#F1F3F0",
+  "theme_color": "#1D2A26",
+  "lang": "ar",
+  "dir": "rtl"
+}
