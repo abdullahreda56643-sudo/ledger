@@ -245,15 +245,32 @@
 .operation-layout select {
   appearance: none;
   -webkit-appearance: none;
-  padding-inline-end: 38px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235D6F68' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: left 13px center;
-  background-size: 17px;
+  color-scheme: inherit;
+  padding-inline: 14px 42px;
+  background-image: none !important;
   cursor: pointer;
 }
-.dark .operation-layout select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238CA29A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+.operation-select-wrap {
+  position: relative;
+  min-width: 0;
+}
+.operation-select-wrap::after {
+  position: absolute;
+  top: calc(50% - 6px);
+  left: 17px;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  content: "";
+  pointer-events: none;
+  transform: rotate(45deg);
+  transition: border-color 150ms, transform 150ms;
+}
+.operation-select-wrap:focus-within::after { border-color: var(--primary); }
+.operation-layout select option {
+  background: var(--surface);
+  color: var(--text);
 }
 
 .field-group { display: grid; gap: 8px; margin: 0; }
@@ -569,6 +586,7 @@
 @media (max-width: 560px) {
   .panel-heading { padding: 16px; }
   .operation-form { padding: 16px; }
+  .operation-layout select { height: 52px; font-size: 15px; }
   .transaction-list { padding: 14px 16px 18px; }
   .empty-activity { margin: 16px; padding: 30px 18px; }
   .form-details { grid-template-columns: 1fr; }

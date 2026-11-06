@@ -458,11 +458,46 @@
   outline: 0;
   transition: border-color 150ms, box-shadow 150ms, background-color 150ms;
 }
+.party-action-form select {
+  min-height: 44px;
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: inherit;
+  padding-inline: 10px 34px;
+  background-image: none !important;
+  cursor: pointer;
+}
 .party-action-form input:focus, .party-action-form select:focus {
   border-color: var(--party-primary);
   background: var(--party-surface);
   box-shadow: 0 0 0 3px var(--party-ring);
 }
+.party-action-form select option {
+  background: var(--party-surface);
+  color: var(--party-text);
+}
+
+.party-select-wrap {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+.party-select-wrap::after {
+  position: absolute;
+  top: calc(50% - 6px);
+  left: 16px;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--party-muted);
+  border-bottom: 2px solid var(--party-muted);
+  content: "";
+  pointer-events: none;
+  transform: rotate(45deg);
+  transition: border-color 150ms;
+}
+.party-select-wrap:focus-within::after { border-color: var(--party-primary); }
+.party-select-wrap select option { background: var(--party-surface); color: var(--party-text); }
+.party-action-form .party-select-wrap select { padding-inline: 10px 34px; }
 
 .party-action-form button {
   min-height: 39px;
@@ -600,7 +635,8 @@
 .party-form-field > span > b { color: var(--party-debit); font-size: 14px; }
 .party-form-field > span > small { color: var(--party-muted); font-size: 12px; font-weight: 500; }
 
-.party-form-field > input, .party-form-field > select, .party-form-field > textarea {
+.party-form-field > input, .party-form-field > select, .party-form-field > textarea,
+.party-form-field > .party-select-wrap > select {
   width: 100%;
   min-width: 0;
   min-height: 48px;
@@ -615,12 +651,23 @@
   font-weight: 500;
   transition: border-color 150ms, box-shadow 150ms, background-color 150ms;
 }
+.party-form-field > .party-select-wrap { display: block; width: 100%; }
+.party-form-field > .party-select-wrap > select {
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: inherit;
+  padding-inline: 14px 42px;
+  background-image: none !important;
+  cursor: pointer;
+}
 .party-form-field > textarea { min-height: 112px; resize: vertical; line-height: 1.7; }
 .party-form-field > input::placeholder, .party-form-field > textarea::placeholder { color: var(--party-muted); opacity: .75; }
-.party-form-field > input:hover, .party-form-field > select:hover, .party-form-field > textarea:hover {
+.party-form-field > input:hover, .party-form-field > select:hover, .party-form-field > textarea:hover,
+.party-form-field > .party-select-wrap > select:hover {
   border-color: color-mix(in srgb, var(--party-primary) 35%, var(--party-border));
 }
-.party-form-field > input:focus, .party-form-field > select:focus, .party-form-field > textarea:focus {
+.party-form-field > input:focus, .party-form-field > select:focus, .party-form-field > textarea:focus,
+.party-form-field > .party-select-wrap > select:focus {
   border-color: var(--party-primary);
   background: var(--party-surface);
   box-shadow: 0 0 0 4px var(--party-ring);
@@ -703,7 +750,7 @@
   .party-form-notes, .party-form-actions { grid-column: auto; }
   .party-form-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 0; padding-top: 13px; }
   .party-form-field { gap: 5px; font-size: 13px; }
-  .party-form-field > input, .party-form-field > select { min-height: 45px; padding-block: 8px; font-size: 14px; }
+  .party-form-field > input, .party-form-field > select, .party-form-field > .party-select-wrap > select { min-height: 48px; padding-block: 8px; font-size: 14px; }
   .party-form-field > textarea { min-height: 82px; padding-block: 8px; }
   .party-form-submit, .party-form-cancel { padding-inline: 10px; }
 }

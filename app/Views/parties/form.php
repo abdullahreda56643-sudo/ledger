@@ -49,11 +49,13 @@ $action = Url::to($isEdit ? '/parties/' . (int) $party['id'] : '/parties');
 
       <label class="party-form-field">
         <span>نوع الطرف <b aria-hidden="true">*</b></span>
-        <select name="kind">
-          <?php foreach (['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'عميل ومورد'] as $key => $label): ?>
-            <option value="<?= View::e($key) ?>" <?= ($values['kind'] ?? 'customer') === $key ? 'selected' : '' ?>><?= View::e($label) ?></option>
-          <?php endforeach; ?>
-        </select>
+        <span class="party-select-wrap">
+          <select name="kind">
+            <?php foreach (['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'عميل ومورد'] as $key => $label): ?>
+              <option value="<?= View::e($key) ?>" <?= ($values['kind'] ?? 'customer') === $key ? 'selected' : '' ?>><?= View::e($label) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </span>
       </label>
 
       <label class="party-form-field party-form-notes">

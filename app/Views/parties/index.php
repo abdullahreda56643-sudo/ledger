@@ -152,7 +152,7 @@ $kindLabels = ['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'ع
                         <input type="hidden" name="_csrf" value="<?= View::e(Csrf::token()) ?>">
                         <label>المبلغ بالجنيه<input required name="amount" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
                         <label>ملاحظة (اختياري)<input name="note" maxlength="255"></label>
-                        <label>اتجاه الرصيد<select name="direction"><option value="debit">عليه (مدين)</option><option value="credit">له (دائن)</option></select></label>
+                        <label>اتجاه الرصيد<span class="party-select-wrap"><select name="direction"><option value="debit">عليه (مدين)</option><option value="credit">له (دائن)</option></select></span></label>
                         <button type="submit">إضافة الرصيد</button>
                       </form>
                     </details>
@@ -161,7 +161,7 @@ $kindLabels = ['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'ع
                       <form action="<?= View::e(Url::to('/parties/' . $partyId . '/adjust')) ?>" method="post" class="party-action-form">
                         <input type="hidden" name="_csrf" value="<?= View::e(Csrf::token()) ?>">
                         <label>المبلغ بالجنيه<input required name="amount" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
-                        <label>اتجاه التسوية<select name="direction"><option value="debit">عليه (مدين)</option><option value="credit">له (دائن)</option></select></label>
+                        <label>اتجاه التسوية<span class="party-select-wrap"><select name="direction"><option value="debit">عليه (مدين)</option><option value="credit">له (دائن)</option></select></span></label>
                         <label>سبب التسوية<input required name="note" maxlength="255"></label>
                         <button type="submit">حفظ التسوية</button>
                       </form>

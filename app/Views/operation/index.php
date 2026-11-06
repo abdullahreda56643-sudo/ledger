@@ -61,12 +61,14 @@ $typeIcons = [
           </svg>
           <input id="party-search" type="search" placeholder="ابحث بالاسم أو رقم الهاتف" autocomplete="off">
         </div>
-        <select id="party-id" name="party_id" required aria-label="اختر الطرف">
-          <option value="">اختر الطرف من القائمة</option>
-          <?php foreach ($parties as $party): ?>
-            <option value="<?= (int) $party['id'] ?>" data-search="<?= View::e($party['name'] . ' ' . $party['phone']) ?>" <?= (string) ($old['party_id'] ?? '') === (string) $party['id'] ? 'selected' : '' ?>><?= View::e($party['name'] . ' — ' . $party['phone']) ?></option>
-          <?php endforeach; ?>
-        </select>
+        <div class="operation-select-wrap">
+          <select id="party-id" name="party_id" required aria-label="اختر الطرف">
+            <option value="">اختر الطرف من القائمة</option>
+            <?php foreach ($parties as $party): ?>
+              <option value="<?= (int) $party['id'] ?>" data-search="<?= View::e($party['name'] . ' ' . $party['phone']) ?>" <?= (string) ($old['party_id'] ?? '') === (string) $party['id'] ? 'selected' : '' ?>><?= View::e($party['name'] . ' — ' . $party['phone']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
       </div>
 
       <div data-weight-fields class="<?= $usesWeight ? '' : 'hidden' ?> amount-fields">

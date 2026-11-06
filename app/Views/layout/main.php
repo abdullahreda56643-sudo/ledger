@@ -69,10 +69,10 @@ $icons = [
     };
   </script>
   <?php if ($currentPath === '/'): ?>
-    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/operation.css')) ?>">
+    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/operation.css?v=3')) ?>">
   <?php endif; ?>
   <?php if (str_starts_with($currentPath, '/parties')): ?>
-    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/parties.css?v=2')) ?>">
+    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/parties.css?v=3')) ?>">
   <?php endif; ?>
   <?php if ($currentPath === '/reports/debtors'): ?>
     <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/reports.css')) ?>">
