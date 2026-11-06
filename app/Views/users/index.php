@@ -14,7 +14,7 @@ $workerCount = count(array_filter($users, static fn (array $user): bool => $user
       <span class="users-eyebrow">إدارة الوصول</span>
       <p>أنشئ حسابات العاملين وتحكم في إمكانية دخولهم للنظام.</p>
     </div>
-    <a class="users-add-link" href="#create-user">
+    <a class="users-add-link" href="#create-user" aria-label="إضافة عامل">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-7-7h14"/></svg>
       <span>إضافة عامل</span>
     </a>

@@ -24,7 +24,7 @@ final class Csrf
     {
         $token = $_POST['_csrf'] ?? null;
         if (!is_string($token) || !self::validate($token)) {
-            http_response_code(419);
+            http_response_code(403);
             echo 'انتهت صلاحية الطلب. أعد تحميل الصفحة وحاول مرة أخرى.';
             exit;
         }

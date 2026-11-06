@@ -38,7 +38,7 @@ $kindLabels = ['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'ع
       <span class="parties-eyebrow">إدارة الحسابات</span>
       <p>تابع بيانات العملاء والموردين وأرصدتهم من مكان واحد.</p>
     </div>
-    <a class="party-primary-action" href="<?= View::e(Url::to('/parties/create')) ?>">
+    <a class="party-primary-action" href="<?= View::e(Url::to('/parties/create')) ?>" aria-label="إضافة طرف جديد">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-7-7h14"/></svg>
       <span>إضافة طرف جديد</span>
     </a>

@@ -36,7 +36,7 @@ $icons = [
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#F3F6F4">
   <script>
     /* تطبيق المظهر المحفوظ قبل الرسم لتجنّب وميض الوضع الداكن */
@@ -57,17 +57,6 @@ $icons = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { colors: {
-        'ledger-ink': '#122621', 'ledger-red': '#B42333', 'ledger-green': '#1B7F5C',
-        'ledger-bg': '#F3F6F4', 'ledger-border': '#DEE7E2', 'ledger-muted': '#5D6F68',
-        'ledger-emerald': '#0E6B5C', 'ledger-gold': '#C29A45'
-      }, fontFamily: { sans: ['IBM Plex Sans Arabic', 'Tajawal', 'sans-serif'] }, borderRadius: { card: '20px' } } }
-    };
-  </script>
   <?php if ($currentPath === '/'): ?>
     <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/operation.css?v=3')) ?>">
   <?php endif; ?>
@@ -445,9 +434,10 @@ $icons = [
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
     }
   </style>
+  <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/responsive.css?v=1')) ?>">
 </head>
 <body>
-  <div id="offline-banner" class="hidden px-4 py-3 text-center text-sm" role="status">الاتصال غير متاح. لم يتم حفظ أي إدخال دون اتصال؛ تحقق من الشبكة قبل إعادة المحاولة.</div>
+  <div id="offline-banner" class="offline-banner hidden" role="status">الاتصال غير متاح. لم يتم حفظ أي إدخال دون اتصال؛ تحقق من الشبكة قبل إعادة المحاولة.</div>
   <div class="app-shell">
     <aside class="app-sidebar">
       <a class="brand-link" href="<?= View::e(Url::to('/')) ?>">
