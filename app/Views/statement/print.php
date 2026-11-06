@@ -51,6 +51,7 @@ $closingBalance = (int) $statement['closing_balance'];
       <div class="print-party-meta">
         <?php if ($party['phone'] !== ''): ?><span>الهاتف: <?= View::e($party['phone']) ?></span><?php endif; ?>
         <span>الفترة: <?= View::e($from) ?> <b>—</b> <?= View::e($to) ?></span>
+        <span>عدد الحركات: <?= count($statement['rows']) ?></span>
       </div>
     </section>
 
@@ -77,6 +78,9 @@ $closingBalance = (int) $statement['closing_balance'];
           <td>—</td>
           <td class="<?= Formatter::balanceClass($openingBalance) ?>"><?= View::e(Formatter::balanceLabel($openingBalance)) ?></td>
         </tr>
+        <?php if ($statement['rows'] === []): ?>
+          <tr class="print-empty"><td colspan="5">لا توجد حركات خلال هذه الفترة.</td></tr>
+        <?php endif; ?>
         <?php foreach ($statement['rows'] as $row): ?>
           <?php $void = (int) $row['is_void'] === 1; $balance = (int) $row['running_balance']; ?>
           <tr class="<?= $void ? 'void' : '' ?>">

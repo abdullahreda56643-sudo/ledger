@@ -1,89 +1,263 @@
+/* ============================================================
+   تقرير المدينين — الهوية الزمرددية/الذهبية
+   تُحمَّل بعد ملف تنسيقات الهيكل العام للتطبيق.
+   الوضع الداكن يعمل تلقائيًا مع كلاس .dark على عنصر <html>.
+   ============================================================ */
+
 .debt-report {
-  --report-primary: #1E3A5F;
-  --report-primary-soft: #EEF3F9;
-  --report-background: #F4F6F8;
+  --report-primary: #0E6B5C;
+  --report-primary-hover: #0A554A;
+  --report-primary-contrast: #FFFFFF;
+  --report-primary-soft: #EDF4F1;
+  --report-ring: rgb(14 107 92 / 16%);
+  --report-gold: #C29A45;
+  --report-gold-soft: rgb(194 154 69 / 12%);
+  --report-gold-border: rgb(194 154 69 / 32%);
+  --report-gold-ink: #8A6B2B;
+  --report-background: #F3F6F4;
   --report-surface: #FFFFFF;
-  --report-border: #E2E7EC;
-  --report-text: #17212B;
-  --report-muted: #5B6874;
+  --report-surface-2: #F7FAF8;
+  --report-border: #DEE7E2;
+  --report-border-strong: #C9D8D1;
+  --report-text: #122621;
+  --report-muted: #5D6F68;
   --report-debit: #B42333;
   --report-debit-soft: #FBEAEC;
   --report-credit: #1B7F5C;
-  --report-credit-soft: #E6F4EE;
+  --report-credit-soft: #E7F4EE;
+  --report-shadow: rgb(18 38 33 / 10%);
+
   display: grid;
   gap: 18px;
   color: var(--report-text);
+  font-variant-numeric: tabular-nums;
 }
 
 .dark .debt-report {
-  --report-primary: #8DB4E8;
-  --report-primary-soft: #202D3D;
-  --report-background: #0F1620;
-  --report-surface: #171F2B;
-  --report-border: #263140;
-  --report-text: #E6ECF2;
-  --report-muted: #93A1B0;
+  --report-primary: #56C9AD;
+  --report-primary-hover: #6ED4BC;
+  --report-primary-contrast: #0B1512;
+  --report-primary-soft: #1A2924;
+  --report-ring: rgb(86 201 173 / 20%);
+  --report-gold: #DDBA6C;
+  --report-gold-soft: rgb(221 186 108 / 12%);
+  --report-gold-border: rgb(221 186 108 / 32%);
+  --report-gold-ink: #E3C176;
+  --report-background: #0B1412;
+  --report-surface: #121E1A;
+  --report-surface-2: #0F1915;
+  --report-border: #24352E;
+  --report-border-strong: #31473E;
+  --report-text: #E7EFEA;
+  --report-muted: #8CA29A;
   --report-debit: #FF8B97;
   --report-debit-soft: #3A252B;
   --report-credit: #5FD0A0;
-  --report-credit-soft: #1D352D;
+  --report-credit-soft: #12291F;
+  --report-shadow: rgb(0 0 0 / 32%);
 }
 
+.debt-report :focus-visible { outline: 2px solid var(--report-primary); outline-offset: 2px; }
+
 .report-intro { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.report-eyebrow { display: block; margin-bottom: 3px; color: var(--report-primary); font-size: 13px; font-weight: 800; }
+
+.report-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+  color: var(--report-gold-ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+.report-eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--report-gold), transparent);
+}
+
 .report-intro p { margin: 0; color: var(--report-muted); font-size: 14px; line-height: 1.65; }
-.report-parties-link { display: inline-flex; min-height: 42px; flex: 0 0 auto; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--report-border); border-radius: 8px; background: var(--report-surface); padding: 0 12px; color: var(--report-primary); font-size: 13px; font-weight: 700; text-decoration: none; transition: background-color 150ms, border-color 150ms; }
-.report-parties-link:hover { border-color: var(--report-primary); background: var(--report-primary-soft); }
+
+.report-parties-link {
+  display: inline-flex;
+  min-height: 44px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--report-border);
+  border-radius: 11px;
+  background: var(--report-surface);
+  padding: 0 14px;
+  color: var(--report-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 150ms, border-color 150ms, color 150ms;
+}
+.report-parties-link:hover {
+  border-color: color-mix(in srgb, var(--report-primary) 45%, var(--report-border));
+  background: var(--report-primary-soft);
+  color: var(--report-primary);
+}
 .report-parties-link svg { width: 18px; height: 18px; }
 
 .report-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.report-summary-card { display: flex; min-width: 0; min-height: 126px; align-items: flex-start; gap: 13px; border: 1px solid var(--report-border); border-radius: 12px; background: var(--report-surface); padding: 17px; }
-.report-summary-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 11px; background: var(--report-primary-soft); color: var(--report-primary); }
-.report-summary-icon svg { width: 21px; height: 21px; }
-.report-summary-credit .report-summary-icon { background: var(--report-credit-soft); color: var(--report-credit); }
-.report-summary-debit .report-summary-icon { background: var(--report-debit-soft); color: var(--report-debit); }
+
+.report-summary-card {
+  display: flex;
+  min-width: 0;
+  min-height: 126px;
+  align-items: flex-start;
+  gap: 13px;
+  border: 1px solid var(--report-border);
+  border-radius: 16px;
+  background:
+    radial-gradient(300px 140px at 100% -20%, var(--report-primary-soft), transparent 70%),
+    var(--report-surface);
+  padding: 17px;
+  box-shadow: 0 8px 22px var(--report-shadow);
+}
+.report-summary-credit .report-summary-card,
+.report-summary-card.report-summary-credit {
+  background:
+    radial-gradient(300px 140px at 100% -20%, var(--report-credit-soft), transparent 70%),
+    var(--report-surface);
+}
+.report-summary-debit .report-summary-card,
+.report-summary-card.report-summary-debit {
+  background:
+    radial-gradient(300px 140px at 100% -20%, var(--report-debit-soft), transparent 70%),
+    var(--report-surface);
+}
+
+.report-summary-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--report-primary) 18%, transparent);
+  border-radius: 13px;
+  background: var(--report-primary-soft);
+  color: var(--report-primary);
+}
+.report-summary-icon svg { width: 22px; height: 22px; }
+.report-summary-credit .report-summary-icon { border-color: transparent; background: var(--report-credit-soft); color: var(--report-credit); }
+.report-summary-debit .report-summary-icon { border-color: transparent; background: var(--report-debit-soft); color: var(--report-debit); }
+
 .report-summary-copy { display: grid; min-width: 0; gap: 4px; }
 .report-summary-copy > span:first-child { color: var(--report-muted); font-size: 13px; font-weight: 600; }
-.report-summary-copy strong { overflow-wrap: anywhere; color: var(--report-text); font-size: clamp(20px, 2.2vw, 26px); font-weight: 800; line-height: 1.35; font-variant-numeric: tabular-nums; }
+.report-summary-copy strong { overflow-wrap: anywhere; color: var(--report-text); font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; line-height: 1.35; font-variant-numeric: tabular-nums; }
 .report-summary-copy strong small { font-size: 12px; font-weight: 600; }
 .report-summary-credit .report-summary-copy strong { color: var(--report-credit); }
 .report-summary-debit .report-summary-copy strong { color: var(--report-debit); }
 .report-summary-note { color: var(--report-muted); font-size: 12px; }
 
-.debtors-panel { overflow: visible; border: 1px solid var(--report-border); border-radius: 12px; background: var(--report-surface); padding: clamp(16px, 2.5vw, 24px); }
+.debtors-panel {
+  overflow: visible;
+  border: 1px solid var(--report-border);
+  border-radius: 16px;
+  background: var(--report-surface);
+  padding: clamp(16px, 2.5vw, 24px);
+  box-shadow: 0 8px 22px var(--report-shadow);
+}
+
 .debtors-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--report-border); padding-bottom: 15px; }
-.debtors-heading h2 { margin: 0; color: var(--report-text); font-size: 18px; font-weight: 800; }
+.debtors-heading h2 { margin: 0; color: var(--report-text); font-size: 18px; font-weight: 700; }
 .debtors-heading p { margin: 4px 0 0; color: var(--report-muted); font-size: 13px; }
-.debtors-count { flex: 0 0 auto; border: 1px solid var(--report-border); border-radius: 7px; background: var(--report-background); padding: 6px 9px; color: var(--report-muted); font-size: 12px; font-weight: 700; }
+
+.debtors-count {
+  flex: 0 0 auto;
+  border: 1px solid var(--report-border);
+  border-radius: 8px;
+  background: var(--report-surface-2);
+  padding: 6px 10px;
+  color: var(--report-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
 
 .debtor-list { display: grid; margin: 0; padding: 0; list-style: none; }
+
 .debtor-item { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 8px 12px; border-bottom: 1px solid var(--report-border); padding: 15px 0; }
 .debtor-item:last-child { border-bottom: 0; padding-bottom: 0; }
-.debtor-rank { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; background: var(--report-background); color: var(--report-muted); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.debtor-item:nth-child(-n+3) .debtor-rank { background: var(--report-primary-soft); color: var(--report-primary); }
+
+.debtor-rank {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--report-surface-2);
+  color: var(--report-muted);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.debtor-item:nth-child(-n+3) .debtor-rank {
+  border: 1px solid color-mix(in srgb, var(--report-primary) 18%, transparent);
+  background: var(--report-primary-soft);
+  color: var(--report-primary);
+}
+
 .debtor-main { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 14px; }
 .debtor-details { display: grid; min-width: 0; gap: 3px; }
-.debtor-name { overflow: hidden; color: var(--report-text); font-size: 15px; font-weight: 800; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.debtor-name { overflow: hidden; color: var(--report-text); font-size: 15px; font-weight: 700; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
 .debtor-name:hover { color: var(--report-primary); text-decoration: underline; text-underline-offset: 3px; }
 .debtor-phone { width: fit-content; color: var(--report-muted); font-size: 12px; text-decoration: none; }
 .debtor-phone:hover { color: var(--report-primary); }
-.debtor-balance { flex: 0 0 auto; color: var(--report-debit); font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.debtor-progress { grid-column: 2; height: 6px; overflow: hidden; border-radius: 99px; background: var(--report-background); }
-.debtor-progress span { display: block; height: 100%; border-radius: inherit; background: var(--report-debit); }
+.debtor-balance { flex: 0 0 auto; color: var(--report-debit); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.debtor-progress { grid-column: 2; height: 6px; overflow: hidden; border-radius: 99px; background: var(--report-surface-2); }
+.debtor-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--report-debit) 62%, transparent), var(--report-debit));
+}
 
 .report-empty { display: grid; min-height: 250px; align-content: center; justify-items: center; padding: 24px 12px; text-align: center; }
-.report-empty-icon { display: grid; width: 50px; height: 50px; place-items: center; border-radius: 14px; background: var(--report-background); color: var(--report-muted); }
-.report-empty-icon svg { width: 25px; height: 25px; }
-.report-empty h3 { margin: 13px 0 4px; color: var(--report-text); font-size: 16px; font-weight: 800; }
+.report-empty-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid var(--report-border);
+  border-radius: 16px;
+  background: var(--report-surface-2);
+  color: var(--report-muted);
+}
+.report-empty-icon svg { width: 26px; height: 26px; }
+.report-empty h3 { margin: 13px 0 4px; color: var(--report-text); font-size: 16px; font-weight: 700; }
 .report-empty p { margin: 0; color: var(--report-muted); font-size: 13px; line-height: 1.7; }
-.report-empty > a { display: inline-flex; min-height: 39px; align-items: center; margin-top: 15px; border: 1px solid var(--report-border); border-radius: 8px; padding: 0 13px; color: var(--report-primary); font-size: 13px; font-weight: 700; text-decoration: none; }
-.report-empty > a:hover { background: var(--report-primary-soft); }
+.report-empty > a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  margin-top: 15px;
+  border: 1px solid var(--report-border);
+  border-radius: 11px;
+  padding: 0 15px;
+  color: var(--report-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 150ms, border-color 150ms;
+}
+.report-empty > a:hover {
+  border-color: color-mix(in srgb, var(--report-primary) 45%, var(--report-border));
+  background: var(--report-primary-soft);
+}
 
 @media (max-width: 760px) {
   .debt-report { gap: 13px; }
   .report-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
   .report-summary-card { min-height: 110px; gap: 9px; padding: 12px; }
-  .report-summary-icon { width: 36px; height: 36px; border-radius: 9px; }
+  .report-summary-icon { width: 38px; height: 38px; border-radius: 10px; }
   .report-summary-icon svg { width: 19px; height: 19px; }
   .report-summary-copy > span:first-child { font-size: 12px; }
   .report-summary-copy strong { font-size: 20px; }
@@ -97,7 +271,7 @@
 @media (max-width: 480px) {
   .report-intro { align-items: flex-start; }
   .report-intro p { max-width: 28ch; font-size: 13px; }
-  .report-parties-link { width: 42px; min-height: 42px; padding: 0; }
+  .report-parties-link { width: 44px; min-height: 44px; padding: 0; }
   .report-parties-link span { display: none; }
   .report-summary-card { min-height: 106px; }
   .report-summary-copy strong { font-size: 18px; }

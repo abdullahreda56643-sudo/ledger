@@ -99,6 +99,29 @@
     });
   });
 
+  document.querySelectorAll('.party-more').forEach((menu) => {
+    menu.addEventListener('toggle', () => {
+      if (!menu.open) {
+        menu.classList.remove('opens-up');
+        menu.style.removeProperty('--party-menu-max-height');
+        return;
+      }
+
+      const summary = menu.querySelector(':scope > summary');
+      const content = menu.querySelector(':scope > .party-menu');
+      if (!summary || !content) return;
+
+      const trigger = summary.getBoundingClientRect();
+      const spaceAbove = Math.max(0, trigger.top - 12);
+      const spaceBelow = Math.max(0, window.innerHeight - trigger.bottom - 12);
+      const openUp = content.scrollHeight > spaceBelow && spaceAbove > spaceBelow;
+      const availableSpace = openUp ? spaceAbove : spaceBelow;
+
+      menu.classList.toggle('opens-up', openUp);
+      menu.style.setProperty('--party-menu-max-height', `${Math.max(96, availableSpace)}px`);
+    });
+  });
+
   const banner = document.querySelector('#offline-banner');
   if (banner) {
     const updateOnline = () => banner.classList.toggle('hidden', navigator.onLine);

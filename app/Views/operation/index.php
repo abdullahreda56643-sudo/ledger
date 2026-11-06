@@ -11,6 +11,14 @@ $old = $old ?? [];
 $type = $old['type'] ?? 'sell';
 $today = date('Y-m-d');
 $usesWeight = in_array($type, ['sell', 'supply'], true);
+
+/* أيقونات أنواع الحركات (للعرض فقط) */
+$typeIcons = [
+    'sell' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-6-6 6 6 6-6"/></svg>',
+    'pay' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>',
+    'supply' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>',
+    'pay_supplier' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>',
+];
 ?>
 <section class="operation-layout" aria-label="التشغيل اليومي">
   <section class="operation-panel" aria-labelledby="operation-form-title">
@@ -37,8 +45,9 @@ $usesWeight = in_array($type, ['sell', 'supply'], true);
           <?php foreach (['sell' => 'سحب', 'pay' => 'دفعة من الطرف', 'supply' => 'توريد', 'pay_supplier' => 'دفعة لمورد'] as $value => $label): ?>
             <label class="operation-type <?= $type === $value ? 'is-selected' : '' ?>">
               <input class="visually-hidden" type="radio" name="type" value="<?= View::e($value) ?>" <?= $type === $value ? 'checked' : '' ?> data-operation-type>
-              <span class="type-indicator" aria-hidden="true"></span>
+              <span class="type-icon" aria-hidden="true"><?= $typeIcons[$value] ?></span>
               <span><?= View::e($label) ?></span>
+              <span class="type-indicator" aria-hidden="true"></span>
             </label>
           <?php endforeach; ?>
         </div>
@@ -102,7 +111,7 @@ $usesWeight = in_array($type, ['sell', 'supply'], true);
           <span>الرصيد الحالي</span>
           <strong data-current-balance>اختر طرفًا</strong>
         </div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         <div>
           <span>بعد الحركة</span>
           <strong data-next-balance>—</strong>
@@ -110,7 +119,7 @@ $usesWeight = in_array($type, ['sell', 'supply'], true);
       </section>
 
       <button class="save-operation" type="submit">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
         <span>حفظ الحركة</span>
       </button>
     </form>
