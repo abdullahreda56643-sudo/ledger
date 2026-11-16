@@ -82,6 +82,41 @@ $tests['URLs respect configured application base path'] = static function () use
     $GLOBALS['config'] = ['app' => ['base_path' => '/ledger/public']];
     $assertSame('/ledger/public/parties', Url::to('/parties'), 'Application URL prefix is incorrect.');
     $assertSame('/ledger/public/', Url::to('/'), 'Application root URL is incorrect.');
+    $assertSame(
+        '/parties',
+        Url::requestPath('/ledger/public/parties?filter=customers'),
+        'Application route prefix should be removed before dispatch.'
+    );
+};
+
+$tests['URLs detect the deployed application path'] = static function () use ($assertSame): void {
+    $hadConfig = array_key_exists('config', $GLOBALS);
+    $previousConfig = $GLOBALS['config'] ?? null;
+    $hadScriptName = array_key_exists('SCRIPT_NAME', $_SERVER);
+    $previousScriptName = $_SERVER['SCRIPT_NAME'] ?? null;
+
+    try {
+        $GLOBALS['config'] = ['app' => ['base_path' => '']];
+        $_SERVER['SCRIPT_NAME'] = '/demo/public/index.php';
+        $assertSame('/demo/public/statement/8', Url::to('/statement/8'), 'Detected application path is incorrect.');
+        $assertSame(
+            '/statement/8',
+            Url::requestPath('/demo/public/statement/8'),
+            'Detected application path should be removed before route dispatch.'
+        );
+    } finally {
+        if ($hadConfig) {
+            $GLOBALS['config'] = $previousConfig;
+        } else {
+            unset($GLOBALS['config']);
+        }
+
+        if ($hadScriptName) {
+            $_SERVER['SCRIPT_NAME'] = $previousScriptName;
+        } else {
+            unset($_SERVER['SCRIPT_NAME']);
+        }
+    }
 };
 
 $tests['router dispatches route parameters and ignores query strings'] = static function () use ($assertSame): void {

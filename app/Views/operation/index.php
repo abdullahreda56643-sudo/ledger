@@ -39,7 +39,7 @@ $typeIcons = [
     <div class="workspace-heading">
       <h2 id="operation-form-title">تسجيل حركة جديدة</h2>
       <div class="selected-party-summary">
-        <span>الطرف المحدد:</span>
+        <span>الطرف:</span>
         <strong id="top-party-pill"><?= $selectedPartyName !== '' ? View::e($selectedPartyName) : 'اختر طرفًا' ?></strong>
       </div>
     </div>
@@ -107,7 +107,9 @@ $typeIcons = [
             </label>
           </div>
 
-          <div class="operation-secondary-fields">
+          <fieldset class="operation-secondary-fields">
+            <legend class="field-label secondary-legend">تفاصيل إضافية</legend>
+
             <label data-pay-now-wrap class="<?= $type === 'sell' ? '' : 'hidden' ?> field-group">
               <span class="field-label">دفع الآن (اختياري)</span>
               <input name="pay_now" type="number" step="0.01" min="0.01" value="<?= View::e($old['pay_now'] ?? '') ?>" inputmode="decimal" data-pay-now placeholder="0">
@@ -128,7 +130,7 @@ $typeIcons = [
               <span class="field-label">ملاحظة (اختياري)</span>
               <input name="note" type="text" maxlength="255" value="<?= View::e($old['note'] ?? '') ?>" placeholder="فرز أول، تسليم المحل...">
             </label>
-          </div>
+          </fieldset>
         </div>
 
         <aside class="operation-summary" aria-label="أثر الحركة على الرصيد">
@@ -137,22 +139,22 @@ $typeIcons = [
             <div class="balance-row">
               <span>الرصيد الحالي</span>
               <span class="balance-number">
-                <strong data-current-balance>اختر طرفًا</strong>
+                <strong data-current-balance aria-live="polite">اختر طرفًا</strong>
                 <span data-current-direction class="balance-badge hidden"></span>
               </span>
             </div>
             <div class="balance-row balance-after-row">
               <span>بعد الحركة</span>
               <span class="balance-number">
-                <strong data-next-balance>—</strong>
+                <strong data-next-balance aria-live="polite">—</strong>
                 <span data-next-direction class="balance-badge hidden"></span>
               </span>
             </div>
           </div>
           <div class="form-feedback hidden" data-form-feedback role="status"></div>
-          <button type="submit" class="save-operation">
+          <button type="submit" class="save-operation" data-submit>
             <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-            <span>حفظ الحركة</span>
+            <span data-submit-label>حفظ الحركة</span>
           </button>
         </aside>
       </div>
@@ -227,7 +229,7 @@ $typeIcons = [
                     </strong>
                     <span class="balance-badge <?= $isDebit ? 'is-owed' : 'is-received' ?>"><?= $isDebit ? 'عليه' : 'له' ?></span>
                   <?php else: ?>
-                    <span class="void-badge">ملغاة</span>
+                    <span class="text-muted">—</span>
                   <?php endif; ?>
                 </td>
                 <td class="table-action" data-label="إجراء">

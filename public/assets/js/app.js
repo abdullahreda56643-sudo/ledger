@@ -258,6 +258,34 @@
     updateOnline();
   }
 
+  const menuButton = document.querySelector('[data-mobile-nav-toggle]');
+  const mobileNav = document.querySelector('#topbar-mobile-nav');
+  if (menuButton && mobileNav) {
+    const setMenuOpen = (open) => {
+      mobileNav.classList.toggle('hidden', !open);
+      menuButton.setAttribute('aria-expanded', String(open));
+      menuButton.setAttribute('aria-label', open ? 'إغلاق القائمة' : 'فتح القائمة');
+      menuButton.querySelector('[data-menu-icon]').textContent = open ? 'close' : 'menu';
+    };
+
+    menuButton.addEventListener('click', () => {
+      setMenuOpen(menuButton.getAttribute('aria-expanded') !== 'true');
+    });
+    mobileNav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setMenuOpen(false)));
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Element && !event.target.closest('.app-topbar')) setMenuOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
+        setMenuOpen(false);
+        menuButton.focus();
+      }
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1023) setMenuOpen(false);
+    });
+  }
+
   document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
     button.addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');

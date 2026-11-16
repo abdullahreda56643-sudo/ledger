@@ -1,8 +1,14 @@
 <?php
 declare(strict_types=1);
 
-$scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/'));
-$basePath = rtrim(dirname($scriptName), '/');
+require __DIR__ . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'autoload.php';
+$GLOBALS['config'] = require __DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
 
-header('Location: ' . $basePath . '/public/', true, 302);
+$configuredBasePath = $GLOBALS['config']['app']['base_path'] ?? '';
+$basePath = \App\Core\Url::basePath();
+$publicPath = is_string($configuredBasePath) && trim($configuredBasePath) !== ''
+    ? ($basePath === '' ? '/' : $basePath . '/')
+    : rtrim($basePath, '/') . '/public/';
+
+header('Location: ' . $publicPath, true, 302);
 exit;
