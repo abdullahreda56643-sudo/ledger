@@ -68,7 +68,7 @@ final class PartyController
             'party' => null,
             'errors' => Http::takeFlash('errors', []),
             'old' => Http::takeFlash('old', []),
-            'pageTitle' => 'إضافة طرف',
+            'pageTitle' => 'إضافة طرف جديد',
         ]);
     }
 
@@ -116,7 +116,7 @@ final class PartyController
             'party' => $party,
             'errors' => Http::takeFlash('errors', []),
             'old' => Http::takeFlash('old', []),
-            'pageTitle' => 'تعديل طرف',
+            'pageTitle' => 'تعديل بيانات الطرف',
         ]);
     }
 
@@ -186,7 +186,11 @@ final class PartyController
                 'tx_date' => $date,
                 'type' => 'opening',
                 'direction' => $direction,
-                'weight' => null,
+                'quantity' => null,
+                'unit_id' => null,
+                'unit_symbol' => null,
+                'base_quantity' => null,
+                'base_unit_symbol' => null,
                 'unit_price' => null,
                 'amount' => $amount,
                 'note' => $note === '' ? 'رصيد أول المدة' : $note,
@@ -232,7 +236,11 @@ final class PartyController
                 'tx_date' => date('Y-m-d'),
                 'type' => 'adjust',
                 'direction' => $direction,
-                'weight' => null,
+                'quantity' => null,
+                'unit_id' => null,
+                'unit_symbol' => null,
+                'base_quantity' => null,
+                'base_unit_symbol' => null,
                 'unit_price' => null,
                 'amount' => $amount,
                 'note' => $note,

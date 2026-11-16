@@ -9,6 +9,7 @@ use App\Core\Router;
 use App\Core\Url;
 use App\Core\View;
 use App\Services\OperationPolicy;
+use App\Services\UnitService;
 
 $tests = [];
 $assertSame = static function (mixed $expected, mixed $actual, string $message): void {
@@ -59,6 +60,41 @@ $tests['transaction types have Arabic labels'] = static function () use ($assert
     $assertSame('سحب', Formatter::type('sell'), 'Sell label is incorrect.');
     $assertSame('دفعة من الطرف', Formatter::type('pay'), 'Payment label is incorrect.');
     $assertSame('unknown', Formatter::type('unknown'), 'Unknown types should remain visible.');
+};
+
+$tests['unit conversion calculates exact monetary totals'] = static function () use ($assertSame): void {
+    $assertSame(
+        ['quantity' => '1000', 'base_quantity' => '1', 'amount' => 20000],
+        UnitService::calculate('1000', '0.001000', 20000),
+        'Gram quantities should convert to kilograms before pricing.'
+    );
+    $assertSame(
+        ['quantity' => '0.5', 'base_quantity' => '0.0005', 'amount' => 5],
+        UnitService::calculate('0.5', '0.001', 10000),
+        'Fractional quantities should preserve monetary rounding.'
+    );
+    $assertSame(
+        ['quantity' => '0.1', 'base_quantity' => '0.0000001', 'amount' => 1],
+        UnitService::calculate('0.1', '0.000001', 10000000),
+        'Converted quantities must preserve all nine supported decimal places.'
+    );
+    $assertSame(null, UnitService::calculate('1', '0', 10000), 'A zero conversion factor must be rejected.');
+    $assertSame(null, UnitService::calculate('1001', '1', 10000), 'Quantities above the limit must be rejected.');
+};
+
+$tests['transaction quantity descriptions preserve converted unit details'] = static function () use ($assertSame): void {
+    $assertSame(
+        '500 جم × 200 جنيه/كجم (≈ 0.5 كجم)',
+        UnitService::movementDescription([
+            'quantity' => '500.000',
+            'unit_symbol' => 'جم',
+            'base_unit_symbol' => 'كجم',
+            'base_quantity' => '0.500000',
+            'unit_price' => 20000,
+        ]),
+        'Transaction details should show the selected and converted quantities.'
+    );
+    $assertSame('1000', UnitService::formatQuantity('1000'), 'Whole-number quantities must keep trailing integer zeros.');
 };
 
 $tests['operation policy matches movement types to party types'] = static function () use ($assertSame): void {

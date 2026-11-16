@@ -13,7 +13,7 @@
 
   if (form) {
     const radios = [...form.querySelectorAll('[data-operation-type]')];
-    const weightFields = form.querySelector('[data-weight-fields]');
+    const unitFields = form.querySelector('[data-unit-fields]');
     const amountFields = form.querySelector('[data-amount-fields]');
     const payNowWrap = form.querySelector('[data-pay-now-wrap]');
     const partySelect = form.querySelector('#party-id');
@@ -27,6 +27,10 @@
     const nextBalance = form.querySelector('[data-next-balance]');
     const nextDirection = form.querySelector('[data-next-direction]');
     const total = form.querySelector('[data-total]');
+    const unitSelect = form.querySelector('[data-unit-select]');
+    const quantityInput = form.querySelector('[data-quantity]');
+    const unitPriceLabel = form.querySelector('[data-price-label]');
+    const unitConversion = form.querySelector('[data-unit-conversion]');
     let balance = null;
     let balanceRequest = 0;
 
@@ -121,14 +125,34 @@
       const usesWeight = type === 'sell' || type === 'supply';
       filterParties(false);
       radios.forEach((radio) => radio.closest('.operation-type')?.classList.toggle('is-selected', radio.checked));
-      weightFields.classList.toggle('hidden', !usesWeight);
+      unitFields.classList.toggle('hidden', !usesWeight);
       amountFields.classList.toggle('hidden', usesWeight);
+      quantityInput.required = usesWeight;
+      unitSelect.required = usesWeight;
+      form.querySelector('[data-price]').required = usesWeight;
+      form.querySelector('[data-amount]').required = !usesWeight;
       payNowWrap.classList.toggle('hidden', type !== 'sell');
+      refreshUnitPresentation();
       updatePreview();
+    };
+    const refreshUnitPresentation = () => {
+      const option = unitSelect.selectedOptions[0];
+      if (!option) return;
+      const factor = Number(option.dataset.factor || 0);
+      const baseName = option.dataset.baseName || 'وحدة الأساس';
+      const baseSymbol = option.dataset.baseSymbol || '';
+      const symbol = option.dataset.symbol || '';
+      unitPriceLabel.textContent = `سعر وحدة الأساس (${baseName} / ${baseSymbol}) بالجنيه`;
+      const quantity = Number(quantityInput.value || 0);
+      const baseQuantity = quantity > 0 && factor > 0
+        ? new Intl.NumberFormat('en-US', { maximumFractionDigits: 9 }).format(quantity * factor)
+        : '—';
+      unitConversion.textContent = `كل 1 ${symbol} = ${factor} ${baseSymbol} · الكمية الأساسية: ${baseQuantity} ${baseSymbol}`;
     };
     const computedAmount = () => {
       if (selectedType() === 'sell' || selectedType() === 'supply') {
-        return Math.round(Number(form.querySelector('[data-weight]').value || 0) * parsePiasters(form.querySelector('[data-price]').value));
+        const factor = Number(unitSelect.selectedOptions[0]?.dataset.factor || 0);
+        return Math.round(Number(quantityInput.value || 0) * factor * parsePiasters(form.querySelector('[data-price]').value));
       }
       return parsePiasters(form.querySelector('[data-amount]').value);
     };
@@ -177,7 +201,14 @@
       }
     };
     radios.forEach((radio) => radio.addEventListener('change', refreshType));
-    form.querySelectorAll('[data-weight], [data-price], [data-amount], [data-pay-now]').forEach((input) => input.addEventListener('input', updatePreview));
+    form.querySelectorAll('[data-quantity], [data-price], [data-amount], [data-pay-now]').forEach((input) => input.addEventListener('input', () => {
+      refreshUnitPresentation();
+      updatePreview();
+    }));
+    unitSelect.addEventListener('change', () => {
+      refreshUnitPresentation();
+      updatePreview();
+    });
     partySelect.addEventListener('change', refreshBalance);
     search.addEventListener('input', updatePartyQuery);
     search.addEventListener('focus', () => filterParties(true));

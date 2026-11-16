@@ -22,15 +22,19 @@ $action = Url::to($isEdit ? '/parties/' . (int) $party['id'] : '/parties');
       <span class="party-form-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.25"/><path d="M3.75 19v-1.5A3.5 3.5 0 0 1 7.25 14h3.5a3.5 3.5 0 0 1 3.5 3.5V19ZM17 8h5m-2.5-2.5v5"/></svg>
       </span>
-      <div>
+      <div class="party-form-heading-copy">
         <h2 id="party-form-heading">بيانات الطرف</h2>
+        <p><?= $isEdit ? 'حدّث بيانات العميل أو المورد ومعلومات التواصل.' : 'سجّل بيانات العميل أو المورد لبدء تسجيل الحركات ومتابعة الرصيد.' ?></p>
       </div>
     </div>
 
     <?php if (!empty($errors)): ?>
       <div class="party-form-errors" role="alert">
-        <strong>يرجى مراجعة البيانات التالية:</strong>
-        <ul><?php foreach ($errors as $error): ?><li><?= View::e($error) ?></li><?php endforeach; ?></ul>
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <div>
+          <strong>يرجى مراجعة البيانات التالية:</strong>
+          <ul><?php foreach ($errors as $error): ?><li><?= View::e($error) ?></li><?php endforeach; ?></ul>
+        </div>
       </div>
     <?php endif; ?>
 
@@ -38,19 +42,28 @@ $action = Url::to($isEdit ? '/parties/' . (int) $party['id'] : '/parties');
       <input type="hidden" name="_csrf" value="<?= View::e(Csrf::token()) ?>">
 
       <label class="party-form-field">
-        <span>اسم الطرف <b aria-hidden="true">*</b></span>
+        <span class="party-form-label-row">
+          <span>اسم الطرف <b aria-hidden="true">*</b></span>
+          <small>مطلوب</small>
+        </span>
         <input required maxlength="150" name="name" value="<?= View::e($values['name'] ?? '') ?>" autocomplete="name" placeholder="مثال: محمد أحمد" autofocus>
       </label>
 
       <label class="party-form-field">
-        <span>رقم الهاتف <b aria-hidden="true">*</b></span>
-        <input required inputmode="tel" type="tel" maxlength="20" name="phone" placeholder="01012345678" value="<?= View::e($values['phone'] ?? '') ?>" autocomplete="tel" dir="ltr">
+        <span class="party-form-label-row">
+          <span>رقم الهاتف <b aria-hidden="true">*</b></span>
+          <small>مطلوب</small>
+        </span>
+        <input required inputmode="tel" type="tel" maxlength="20" name="phone" placeholder="010 1234 5678" value="<?= View::e($values['phone'] ?? '') ?>" autocomplete="tel" dir="ltr">
       </label>
 
-      <label class="party-form-field">
-        <span>نوع الطرف <b aria-hidden="true">*</b></span>
+      <label class="party-form-field party-form-type">
+        <span class="party-form-label-row">
+          <span>نوع الطرف <b aria-hidden="true">*</b></span>
+          <small>مطلوب</small>
+        </span>
         <span class="party-select-wrap">
-          <select name="kind">
+          <select required name="kind">
             <?php foreach (['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'عميل ومورد'] as $key => $label): ?>
               <option value="<?= View::e($key) ?>" <?= ($values['kind'] ?? 'customer') === $key ? 'selected' : '' ?>><?= View::e($label) ?></option>
             <?php endforeach; ?>
@@ -59,7 +72,10 @@ $action = Url::to($isEdit ? '/parties/' . (int) $party['id'] : '/parties');
       </label>
 
       <label class="party-form-field party-form-notes">
-        <span>ملاحظات <small>(اختياري)</small></span>
+        <span class="party-form-label-row">
+          <span>ملاحظات</span>
+          <small>اختياري</small>
+        </span>
         <textarea maxlength="255" name="notes" rows="3" placeholder="أضف تفاصيل مختصرة (اختياري)"><?= View::e($values['notes'] ?? '') ?></textarea>
       </label>
 

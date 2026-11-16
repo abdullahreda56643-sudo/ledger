@@ -7,6 +7,7 @@ use App\Controllers\OperationController;
 use App\Controllers\PartyController;
 use App\Controllers\ReportController;
 use App\Controllers\StatementController;
+use App\Controllers\UnitSettingsController;
 use App\Core\Router;
 use App\Controllers\UsersController;
 
@@ -15,6 +16,7 @@ return static function (Router $router): void {
     $operation = new OperationController();
     $party = new PartyController();
     $statement = new StatementController();
+    $unitSettings = new UnitSettingsController();
     $report = new ReportController();
     $users = new UsersController();
     $audit = new AuditController();
@@ -41,4 +43,7 @@ return static function (Router $router): void {
     $router->post('/users', [$users, 'store']);
     $router->post('/users/{id}/active', [$users, 'setActive']);
     $router->get('/audit', [$audit, 'index']);
+    $router->get('/settings/units', [$unitSettings, 'index']);
+    $router->post('/settings/units', [$unitSettings, 'store']);
+    $router->post('/settings/units/{id}', [$unitSettings, 'update']);
 };

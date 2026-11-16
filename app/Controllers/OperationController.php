@@ -10,8 +10,10 @@ use App\Core\Input;
 use App\Core\View;
 use App\Models\Party;
 use App\Models\Transaction;
+use App\Models\Unit;
 use App\Services\AuditService;
 use App\Services\OperationPolicy;
+use App\Services\UnitService;
 
 final class OperationController
 {
@@ -52,6 +54,7 @@ final class OperationController
 
         View::render('operation/index', [
             'parties' => Party::active(),
+            'units' => Unit::active(),
             'transactions' => $result['items'],
             'totalTransactions' => $result['total'],
             'from' => $from,
@@ -95,26 +98,43 @@ final class OperationController
             $errors[] = 'العامل يستطيع تسجيل حركات بتاريخ اليوم فقط.';
         }
 
-        $weight = null;
+        $quantity = null;
+        $unitId = null;
+        $unit = null;
+        $unitSymbol = null;
+        $baseQuantity = null;
+        $baseUnitSymbol = null;
         $price = null;
         $amount = null;
         if (in_array($type, ['sell', 'supply'], true)) {
-            $weightText = trim(Input::string($_POST, 'weight'));
-            if (!preg_match('/^\d{1,7}(?:\.\d{1,3})?$/', $weightText) || (float) $weightText <= 0 || (float) $weightText > 1000) {
-                $errors[] = 'أدخل وزنًا صحيحًا أكبر من صفر وبحد أقصى 1000 كجم.';
+            $quantityText = trim(Input::string($_POST, 'quantity'));
+            if (!preg_match('/^\d{1,7}(?:\.\d{1,3})?$/', $quantityText) || (float) $quantityText <= 0 || (float) $quantityText > 1000) {
+                $errors[] = 'أدخل كمية صحيحة أكبر من صفر وبحد أقصى 1000 وحدة.';
             } else {
-                [$wholeWeight, $fractionWeight] = array_pad(explode('.', $weightText, 2), 2, '');
-                $weightMilli = (int) $wholeWeight * 1000 + (int) str_pad($fractionWeight, 3, '0');
-                $weight = intdiv($weightMilli, 1000) . '.' . str_pad((string) ($weightMilli % 1000), 3, '0', STR_PAD_LEFT);
+                $unitIdValue = filter_var($_POST['unit_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+                $unit = $unitIdValue === false ? null : Unit::findActive((int) $unitIdValue);
+                if ($unit === null) {
+                    $errors[] = 'اختر وحدة قياس نشطة.';
+                } else {
+                    $unitId = (int) $unit['id'];
+                    $unitSymbol = (string) $unit['symbol'];
+                    $baseUnitSymbol = (string) $unit['base_unit_symbol'];
+                }
             }
             $price = self::parseMoney($_POST['unit_price'] ?? null);
             if ($price === null || $price <= 0 || $price > 10000000) {
-                $errors[] = 'أدخل سعرًا صحيحًا للكيلو.';
+                $baseUnitName = isset($unit['base_unit_name']) ? (string) $unit['base_unit_name'] : 'وحدة الأساس';
+                $errors[] = 'أدخل سعرًا صحيحًا لكل ' . $baseUnitName . '.';
             }
-            if ($weight !== null && $price !== null) {
-                $amount = intdiv($weightMilli * $price + 500, 1000);
-                if ($amount <= 0 || $amount > self::MAX_AMOUNT) {
-                    $errors[] = 'قيمة الحركة تتجاوز الحد المسموح.';
+            if ($unit !== null && $price !== null && $price > 0 && $price <= 10000000
+                && preg_match('/^\d{1,7}(?:\.\d{1,3})?$/', $quantityText)) {
+                $calculation = UnitService::calculate($quantityText, (string) $unit['factor_to_base'], $price);
+                if ($calculation === null) {
+                    $errors[] = 'تعذر حساب قيمة الحركة؛ تحقق من الكمية والسعر والوحدة المختارة.';
+                } else {
+                    $quantity = $calculation['quantity'];
+                    $baseQuantity = $calculation['base_quantity'];
+                    $amount = $calculation['amount'];
                 }
             }
         } else {
@@ -154,7 +174,11 @@ final class OperationController
                 'tx_date' => $date,
                 'type' => $type,
                 'direction' => $direction,
-                'weight' => $weight,
+                'quantity' => $quantity,
+                'unit_id' => $unitId,
+                'unit_symbol' => $unitSymbol,
+                'base_quantity' => $baseQuantity,
+                'base_unit_symbol' => $baseUnitSymbol,
                 'unit_price' => $price,
                 'amount' => $amount,
                 'note' => $note === '' ? null : $note,
@@ -168,7 +192,11 @@ final class OperationController
                     'tx_date' => $date,
                     'type' => 'pay',
                     'direction' => 'credit',
-                    'weight' => null,
+                    'quantity' => null,
+                    'unit_id' => null,
+                    'unit_symbol' => null,
+                    'base_quantity' => null,
+                    'base_unit_symbol' => null,
                     'unit_price' => null,
                     'amount' => $payNow,
                     'note' => 'دفع فوري مع السحب',

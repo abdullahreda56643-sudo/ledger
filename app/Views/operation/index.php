@@ -7,6 +7,7 @@ use App\Core\Formatter;
 use App\Core\Url;
 use App\Core\View;
 use App\Services\OperationPolicy;
+use App\Services\UnitService;
 
 $old = $old ?? [];
 $type = $old['type'] ?? 'sell';
@@ -18,7 +19,26 @@ $endRecord = min($page * $perPage, $totalTransactions);
 $historyPageUrl = static function (int $targetPage) use ($from, $to): string {
     return Url::to('/?' . http_build_query(['from' => $from, 'to' => $to, 'page' => $targetPage]));
 };
-$usesWeight = in_array($type, ['sell', 'supply'], true);
+$usesQuantity = in_array($type, ['sell', 'supply'], true);
+$unitsByCategory = [];
+$selectedUnitId = (string) ($old['unit_id'] ?? '');
+$selectedUnit = null;
+foreach ($units as $unit) {
+    $unitsByCategory[$unit['category_code']]['name'] = $unit['category_name'];
+    $unitsByCategory[$unit['category_code']]['units'][] = $unit;
+    if ($selectedUnitId !== '' && (string) $unit['id'] === $selectedUnitId) {
+        $selectedUnit = $unit;
+    }
+}
+if ($selectedUnit === null) {
+    foreach ($units as $unit) {
+        if ((int) $unit['is_default'] === 1) {
+            $selectedUnit = $unit;
+            $selectedUnitId = (string) $unit['id'];
+            break;
+        }
+    }
+}
 $selectedPartyName = '';
 $selectedPartyId = (string) ($old['party_id'] ?? '');
 foreach ($parties as $party) {
@@ -37,7 +57,10 @@ $typeIcons = [
 <div class="operation-screen" aria-label="التشغيل اليومي">
   <section class="operation-workspace" aria-labelledby="operation-form-title">
     <div class="workspace-heading">
-      <h2 id="operation-form-title">تسجيل حركة جديدة</h2>
+      <h2 id="operation-form-title">
+        <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+        تسجيل حركة جديدة
+      </h2>
       <div class="selected-party-summary">
         <span>الطرف:</span>
         <strong id="top-party-pill"><?= $selectedPartyName !== '' ? View::e($selectedPartyName) : 'اختر طرفًا' ?></strong>
@@ -48,7 +71,7 @@ $typeIcons = [
       <input type="hidden" name="_csrf" value="<?= View::e(Csrf::token()) ?>">
 
       <fieldset class="operation-fieldset">
-        <legend class="visually-hidden">نوع الحركة</legend>
+        <legend class="operation-type-legend field-label">نوع الحركة</legend>
         <div class="operation-types" role="radiogroup" aria-label="نوع الحركة">
           <?php foreach (['sell' => 'سحب', 'pay' => 'دفعة من الطرف', 'supply' => 'توريد', 'pay_supplier' => 'دفعة لمورد'] as $value => $label): ?>
             <label class="operation-type <?= $type === $value ? 'is-selected' : '' ?>">
@@ -63,10 +86,10 @@ $typeIcons = [
       <div class="operation-form-grid">
         <div class="operation-fields">
           <div class="party-picker">
-            <label for="party-search" class="field-label">الطرف (العميل أو المورد)</label>
+            <label for="party-search" class="field-label">العميل أو المورد</label>
             <div class="party-search-wrap">
               <span class="material-symbols-outlined" aria-hidden="true">search</span>
-              <input id="party-search" type="search" value="<?= View::e($selectedPartyName) ?>" placeholder="ابحث بالاسم أو رقم الموبايل..." autocomplete="off" required aria-autocomplete="list" aria-controls="party-dropdown" aria-expanded="false">
+              <input id="party-search" type="search" value="<?= View::e($selectedPartyName) ?>" placeholder="ابحث بالاسم أو رقم الهاتف..." autocomplete="off" required aria-autocomplete="list" aria-controls="party-dropdown" aria-expanded="false">
               <div id="party-dropdown" class="party-dropdown hidden" role="listbox" aria-label="نتائج البحث عن الأطراف">
                 <?php foreach ($parties as $party): ?>
                   <button type="button" class="party-option hidden" role="option" aria-selected="false" data-party-option data-party-id="<?= (int) $party['id'] ?>" data-search="<?= View::e($party['name'] . ' ' . $party['phone']) ?>" data-name="<?= View::e($party['name']) ?>">
@@ -85,22 +108,40 @@ $typeIcons = [
             </select>
           </div>
 
-          <div data-weight-fields class="<?= $usesWeight ? '' : 'hidden' ?> weighted-inputs amount-fields">
+          <div data-unit-fields class="<?= $usesQuantity ? '' : 'hidden' ?> weighted-inputs amount-fields">
             <label class="field-group">
-              <span class="field-label">الوزن (كجم)</span>
-              <input name="weight" type="number" step="0.001" min="0.001" max="1000" value="<?= View::e($old['weight'] ?? '') ?>" inputmode="decimal" data-weight placeholder="مثال: 45">
+              <span class="field-label">الكمية</span>
+              <input name="quantity" type="number" step="0.001" min="0.001" max="1000" value="<?= View::e($old['quantity'] ?? '') ?>" inputmode="decimal" data-quantity placeholder="مثال: 45">
             </label>
             <label class="field-group">
-              <span class="field-label">السعر للكيلو (جنيه)</span>
-              <input name="unit_price" type="number" step="0.01" min="0.01" value="<?= View::e($old['unit_price'] ?? '') ?>" inputmode="decimal" data-price placeholder="أدخل سعر الكيلو">
+              <span class="field-label">وحدة القياس</span>
+              <span class="unit-select-control">
+                <span class="material-symbols-outlined" aria-hidden="true">straighten</span>
+                <select name="unit_id" data-unit-select>
+                  <?php foreach ($unitsByCategory as $category): ?>
+                    <optgroup label="<?= View::e($category['name']) ?>">
+                      <?php foreach ($category['units'] as $unit): ?>
+                        <option value="<?= (int) $unit['id'] ?>" data-factor="<?= View::e($unit['factor_to_base']) ?>" data-base-name="<?= View::e($unit['base_unit_name']) ?>" data-base-symbol="<?= View::e($unit['base_unit_symbol']) ?>" data-symbol="<?= View::e($unit['symbol']) ?>" <?= $selectedUnitId === (string) $unit['id'] ? 'selected' : '' ?>>
+                          <?= View::e($unit['name']) ?> (<?= View::e($unit['symbol']) ?>)
+                        </option>
+                      <?php endforeach; ?>
+                    </optgroup>
+                  <?php endforeach; ?>
+                </select>
+              </span>
+            </label>
+            <label class="field-group">
+              <span class="field-label" data-price-label>سعر وحدة الأساس (<?= View::e($selectedUnit['base_unit_name'] ?? 'وحدة الأساس') ?> / <?= View::e($selectedUnit['base_unit_symbol'] ?? '') ?>) بالجنيه</span>
+              <input name="unit_price" type="number" step="0.01" min="0.01" value="<?= View::e($old['unit_price'] ?? '') ?>" inputmode="decimal" data-price placeholder="أدخل سعر وحدة الأساس">
             </label>
             <div class="estimated-total">
               <span class="field-label">الإجمالي التقديري</span>
               <strong><b data-total>0</b> <small>جنيه</small></strong>
+              <small data-unit-conversion>كل 1 <?= View::e($selectedUnit['symbol'] ?? '') ?> = <?= View::e($selectedUnit['factor_to_base'] ?? '1') ?> <?= View::e($selectedUnit['base_unit_symbol'] ?? '') ?></small>
             </div>
           </div>
 
-          <div data-amount-fields class="<?= $usesWeight ? 'hidden' : '' ?> direct-input amount-fields">
+          <div data-amount-fields class="<?= $usesQuantity ? 'hidden' : '' ?> direct-input amount-fields">
             <label class="field-group">
               <span class="field-label">المبلغ (جنيه)</span>
               <input name="amount" type="number" step="0.01" min="0.01" value="<?= View::e($old['amount'] ?? '') ?>" inputmode="decimal" data-amount placeholder="أدخل مبلغ الحركة">
@@ -111,7 +152,7 @@ $typeIcons = [
             <legend class="field-label secondary-legend">تفاصيل إضافية</legend>
 
             <label data-pay-now-wrap class="<?= $type === 'sell' ? '' : 'hidden' ?> field-group">
-              <span class="field-label">دفع الآن (اختياري)</span>
+              <span class="field-label">المبلغ المدفوع الآن (اختياري)</span>
               <input name="pay_now" type="number" step="0.01" min="0.01" value="<?= View::e($old['pay_now'] ?? '') ?>" inputmode="decimal" data-pay-now placeholder="0">
             </label>
 
@@ -183,8 +224,8 @@ $typeIcons = [
     <?php if ($transactions === []): ?>
       <div class="empty-activity">
         <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
-        <p>لسه مفيش حركات</p>
-        <span>ابدأ بتسجيل أول حركة من مساحة العمل بالأعلى</span>
+        <p>لا توجد حركات في الفترة المحددة.</p>
+        <span>غيّر نطاق التاريخ أو سجّل حركة جديدة لتظهر هنا.</span>
       </div>
     <?php else: ?>
       <div class="transaction-table-wrap">
@@ -213,8 +254,8 @@ $typeIcons = [
                 </td>
                 <td class="table-type" data-label="النوع"><?= View::e(Formatter::type($transaction['type'])) ?></td>
                 <td class="table-details" data-label="التفاصيل">
-                  <?php if ($transaction['weight'] !== null): ?>
-                    <?= View::e($transaction['weight']) ?> كجم × <?= View::e(Formatter::money($transaction['unit_price'])) ?> جنيه
+                  <?php if ($transaction['quantity'] !== null): ?>
+                    <?= View::e(UnitService::movementDescription($transaction)) ?>
                   <?php else: ?>—<?php endif; ?>
                 </td>
                 <td class="table-meta" data-label="بواسطة / التاريخ">

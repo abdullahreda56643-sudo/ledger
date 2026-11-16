@@ -24,6 +24,31 @@ CREATE TABLE IF NOT EXISTS parties (
   UNIQUE INDEX idx_phone (phone)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS unit_categories (
+  code VARCHAR(24) PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  base_unit_name VARCHAR(50) NOT NULL,
+  base_unit_symbol VARCHAR(24) NOT NULL,
+  sort_order SMALLINT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS units (
+  id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  category_code VARCHAR(24) NOT NULL,
+  name VARCHAR(60) NOT NULL,
+  symbol VARCHAR(24) NOT NULL,
+  factor_to_base DECIMAL(14,6) NOT NULL,
+  is_base TINYINT(1) NOT NULL DEFAULT 0,
+  is_default TINYINT(1) NOT NULL DEFAULT 0,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_units_category FOREIGN KEY (category_code) REFERENCES unit_categories(code),
+  CONSTRAINT chk_unit_factor CHECK (factor_to_base > 0),
+  UNIQUE INDEX uq_unit_category_symbol (category_code, symbol),
+  INDEX idx_units_category_active (category_code, is_active, sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS transactions (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   party_id INT UNSIGNED NOT NULL,
@@ -31,6 +56,11 @@ CREATE TABLE IF NOT EXISTS transactions (
   type ENUM('sell','pay','supply','pay_supplier','opening','adjust') NOT NULL,
   direction ENUM('debit','credit') NOT NULL,
   weight DECIMAL(10,3) NULL,
+  quantity DECIMAL(10,3) NULL,
+  unit_id SMALLINT UNSIGNED NULL,
+  unit_symbol VARCHAR(24) NULL,
+  base_quantity DECIMAL(20,9) NULL,
+  base_unit_symbol VARCHAR(24) NULL,
   unit_price BIGINT NULL,
   amount BIGINT NOT NULL,
   note VARCHAR(255) NULL,
@@ -42,12 +72,14 @@ CREATE TABLE IF NOT EXISTS transactions (
   created_by INT UNSIGNED NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_transactions_party FOREIGN KEY (party_id) REFERENCES parties(id),
+  CONSTRAINT fk_transactions_unit FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT,
   CONSTRAINT fk_transactions_creator FOREIGN KEY (created_by) REFERENCES users(id),
   CONSTRAINT fk_transactions_voider FOREIGN KEY (voided_by) REFERENCES users(id),
   CONSTRAINT chk_transaction_amount CHECK (amount > 0),
   INDEX idx_party_date (party_id, tx_date, id),
   INDEX idx_date (tx_date),
-  INDEX idx_group (group_id)
+  INDEX idx_group (group_id),
+  INDEX idx_transactions_unit (unit_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS audit_log (

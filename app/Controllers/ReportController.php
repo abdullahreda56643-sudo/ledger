@@ -27,7 +27,7 @@ final class ReportController
              ) balances'
         )->fetch(PDO::FETCH_ASSOC);
         $parties = $pdo->query(
-            'SELECT p.id, p.name, p.phone, p.is_active,
+            'SELECT p.id, p.name, p.phone, p.kind, p.is_active,
                     COALESCE(SUM(CASE WHEN t.is_void = 0 AND t.direction = \'debit\' THEN t.amount
                                       WHEN t.is_void = 0 AND t.direction = \'credit\' THEN -t.amount
                                       ELSE 0 END), 0) AS balance
@@ -39,7 +39,7 @@ final class ReportController
             'summary' => $summary,
             'parties' => $parties,
             'maxBalance' => $maxBalance,
-            'pageTitle' => 'تقرير المديونية',
+            'pageTitle' => 'تقرير المديونيات',
         ]);
     }
 }

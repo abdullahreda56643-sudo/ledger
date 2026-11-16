@@ -23,14 +23,17 @@ $nav = [
 if ($isOwner) {
     $nav[] = ['path' => '/reports/debtors', 'label' => 'التقارير'];
     $nav[] = ['path' => '/users',           'label' => 'إدارة المستخدمين'];
+    $nav[] = ['path' => '/settings/units',  'label' => 'إعدادات الوحدات'];
     $nav[] = ['path' => '/audit',           'label' => 'سجل التدقيق'];
 }
 
 $description = match (true) {
-    $currentPath === '/'                          => 'تسجيل حركات العملاء والموردين ومتابعة سجل اليوم',
-    $currentPath === '/parties'                   => 'إدارة العملاء والموردين ومراجعة أرصدتهم',
+    $currentPath === '/'                          => '',
+    $currentPath === '/parties'                   => '',
+    str_starts_with($currentPath, '/parties/')     => '',
     $currentPath === '/reports/debtors'           => 'متابعة الأطراف ذات الأرصدة المستحقة',
     $currentPath === '/users'                     => 'إدارة حسابات العاملين وصلاحياتهم',
+    $currentPath === '/settings/units'            => 'إدارة وحدات القياس والتحويلات',
     $currentPath === '/audit'                     => 'مراجعة سجل الأنشطة والتغييرات',
     str_starts_with($currentPath, '/statement')   => 'مراجعة الحركات والرصيد الحالي للطرف',
     default                                       => 'إدارة الحسابات اليومية بكل وضوح',
@@ -68,15 +71,16 @@ $icons = [
    3) أنماط CSS للصفحة
    ========================================================== */
 $pageStyles = [
-    '/'                => '/assets/css/operation.css?v=9',
-    '/reports/debtors' => '/assets/css/reports.css',
+    '/'                => '/assets/css/operation.css?v=12',
+    '/reports/debtors' => '/assets/css/reports.css?v=6',
     '/users'           => '/assets/css/users.css',
+    '/settings/units'  => '/assets/css/units.css?v=1',
     '/audit'           => '/assets/css/audit.css',
 ];
-if (str_starts_with($currentPath, '/parties')) {
-    $pageStyles['/parties'] = '/assets/css/parties.css?v=5';
-}
 $pageStyle = $pageStyles[$currentPath] ?? null;
+if (str_starts_with($currentPath, '/parties')) {
+    $pageStyle = '/assets/css/parties.css?v=6';
+}
 ?>
 <!doctype html>
 <html lang="ar" dir="rtl">
@@ -110,9 +114,9 @@ $pageStyle = $pageStyles[$currentPath] ?? null;
     <link rel="stylesheet" href="<?= View::e(Url::to($pageStyle)) ?>">
   <?php endif; ?>
   <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/responsive.css?v=3')) ?>">
-  <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/print.css?v=3')) ?>">
+  <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/print.css?v=6')) ?>">
 
-  <script defer src="<?= View::e(Url::to('/assets/js/app.js?v=4')) ?>"></script>
+  <script defer src="<?= View::e(Url::to('/assets/js/app.js?v=6')) ?>"></script>
 
   <style>
     /* ==========================================================
@@ -589,23 +593,25 @@ $pageStyle = $pageStyles[$currentPath] ?? null;
 
   <div class="app-shell">
     <main class="app-main">
-      <header class="main-page-heading">
-        <div>
-          <nav aria-label="مسار التنقل" class="page-breadcrumb">
-            <span>دفتر الحساب</span>
-            <span aria-hidden="true">/</span>
-            <span><?= View::e($pageTitle) ?></span>
-          </nav>
-          <h1 class="main-page-title"><?= View::e($pageTitle) ?></h1>
-          <p class="page-description"><?= View::e($description) ?></p>
-        </div>
-        <?php if ($todayLabel !== null): ?>
-          <div class="page-date">
-            <span aria-hidden="true"></span>
-            <time datetime="<?= View::e(date('Y-m-d')) ?>"><?= View::e($todayLabel) ?></time>
+      <?php if ($currentPath !== '/reports/debtors' && !str_starts_with($currentPath, '/statement/')): ?>
+        <header class="main-page-heading">
+          <div>
+            <nav aria-label="مسار التنقل" class="page-breadcrumb">
+              <span>دفتر الحساب</span>
+              <span aria-hidden="true">/</span>
+              <span><?= View::e($pageTitle) ?></span>
+            </nav>
+            <h1 class="main-page-title"><?= View::e($pageTitle) ?></h1>
+            <p class="page-description"><?= View::e($description) ?></p>
           </div>
-        <?php endif; ?>
-      </header>
+          <?php if ($todayLabel !== null): ?>
+            <div class="page-date">
+              <span aria-hidden="true"></span>
+              <time datetime="<?= View::e(date('Y-m-d')) ?>"><?= View::e($todayLabel) ?></time>
+            </div>
+          <?php endif; ?>
+        </header>
+      <?php endif; ?>
 
       <?php if (!empty($success)): ?>
         <div class="flash-message flash-success" role="status"><?= View::e($success) ?></div>

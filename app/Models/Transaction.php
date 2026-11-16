@@ -15,9 +15,11 @@ final class Transaction
     {
         $statement = Database::connection()->prepare(
             'INSERT INTO transactions
-                (party_id, tx_date, type, direction, weight, unit_price, amount, note, group_id, created_by)
+                (party_id, tx_date, type, direction, quantity, unit_id, unit_symbol, base_quantity, base_unit_symbol,
+                 unit_price, amount, note, group_id, created_by)
              VALUES
-                (:party_id, :tx_date, :type, :direction, :weight, :unit_price, :amount, :note, :group_id, :created_by)'
+                (:party_id, :tx_date, :type, :direction, :quantity, :unit_id, :unit_symbol, :base_quantity,
+                 :base_unit_symbol, :unit_price, :amount, :note, :group_id, :created_by)'
         );
         $statement->execute($data);
         return (int) Database::connection()->lastInsertId();
