@@ -6,10 +6,17 @@ use App\Core\Csrf;
 use App\Core\Formatter;
 use App\Core\Url;
 use App\Core\View;
+use App\Services\OperationPolicy;
 
 $old = $old ?? [];
 $type = $old['type'] ?? 'sell';
 $today = date('Y-m-d');
+$isToday = $from === $today && $to === $today;
+$startRecord = $totalTransactions > 0 ? (($page - 1) * $perPage) + 1 : 0;
+$endRecord = min($page * $perPage, $totalTransactions);
+$historyPageUrl = static function (int $targetPage) use ($from, $to): string {
+    return Url::to('/?' . http_build_query(['from' => $from, 'to' => $to, 'page' => $targetPage]));
+};
 $usesWeight = in_array($type, ['sell', 'supply'], true);
 
 /* أيقونات أنواع الحركات (للعرض فقط) */
@@ -65,7 +72,7 @@ $typeIcons = [
           <select id="party-id" name="party_id" required aria-label="اختر الطرف">
             <option value="">اختر الطرف من القائمة</option>
             <?php foreach ($parties as $party): ?>
-              <option value="<?= (int) $party['id'] ?>" data-search="<?= View::e($party['name'] . ' ' . $party['phone']) ?>" <?= (string) ($old['party_id'] ?? '') === (string) $party['id'] ? 'selected' : '' ?>><?= View::e($party['name'] . ' — ' . $party['phone']) ?></option>
+              <option value="<?= (int) $party['id'] ?>" data-search="<?= View::e($party['name'] . ' ' . $party['phone']) ?>" data-operations="<?= View::e(implode(' ', OperationPolicy::operationsForPartyType((string) $party['kind']))) ?>" <?= (string) ($old['party_id'] ?? '') === (string) $party['id'] ? 'selected' : '' ?>><?= View::e($party['name'] . ' — ' . $party['phone']) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -130,12 +137,30 @@ $typeIcons = [
   <section class="daily-panel" aria-labelledby="daily-activity-title">
     <header class="panel-heading daily-heading">
       <div>
-        <span class="panel-eyebrow">ملخص اليوم</span>
-        <h2 id="daily-activity-title">حركات اليوم</h2>
-        <p><?= View::e(date('d/m/Y')) ?> <span class="today-status"><i aria-hidden="true"></i> اليوم</span></p>
+        <span class="panel-eyebrow">سجل الحركات</span>
+        <h2 id="daily-activity-title"><?= $isToday ? 'حركات اليوم' : 'الحركات خلال الفترة' ?></h2>
+        <p>
+          <?= View::e($from) ?> — <?= View::e($to) ?>
+          <?php if ($isToday): ?><span class="today-status"><i aria-hidden="true"></i> اليوم</span><?php endif; ?>
+        </p>
       </div>
-      <span class="transaction-count"><?= count($transactions) ?> حركة</span>
+      <span class="transaction-count"><?= number_format($totalTransactions) ?> حركة</span>
     </header>
+
+    <form class="history-filter" method="get" action="<?= View::e(Url::to('/')) ?>">
+      <label>من تاريخ<input type="date" name="from" max="<?= View::e($today) ?>" value="<?= View::e($from) ?>" required></label>
+      <label>إلى تاريخ<input type="date" name="to" max="<?= View::e($today) ?>" value="<?= View::e($to) ?>" required></label>
+      <button type="submit">عرض الحركات</button>
+      <?php if ($totalTransactions > 0): ?>
+        <span class="history-result-count">عرض <?= number_format($startRecord) ?>–<?= number_format($endRecord) ?> من <?= number_format($totalTransactions) ?></span>
+      <?php endif; ?>
+    </form>
+
+    <?php if ($errors !== []): ?>
+      <div class="history-errors" role="alert">
+        <?php foreach ($errors as $error): ?><p><?= View::e($error) ?></p><?php endforeach; ?>
+      </div>
+    <?php endif; ?>
 
     <?php if ($transactions === []): ?>
       <div class="empty-activity">
@@ -143,7 +168,7 @@ $typeIcons = [
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.75h7l4.25 4.5v11A1.75 1.75 0 0 1 16.5 21h-9A1.75 1.75 0 0 1 5.75 19.25v-13A2.5 2.5 0 0 1 8.25 3.75Z"/><path d="M14 4v5h4M9 14h6m-3-3v6"/></svg>
         </span>
         <h3>لسه مفيش حركات</h3>
-        <p>أول ما تسجل حركة هتظهر هنا في ملخص اليوم.</p>
+        <p>لا توجد حركات مسجلة في الفترة المحددة.</p>
         <a href="#operation-form-title">ابدأ بتسجيل حركة</a>
       </div>
     <?php else: ?>
@@ -192,6 +217,14 @@ $typeIcons = [
           </li>
         <?php endforeach; ?>
       </ul>
+    <?php endif; ?>
+
+    <?php if ($totalPages > 1): ?>
+      <nav class="history-pagination" aria-label="صفحات الحركات">
+        <?php if ($page > 1): ?><a href="<?= View::e($historyPageUrl($page - 1)) ?>">السابق</a><?php endif; ?>
+        <span>صفحة <?= number_format($page) ?> من <?= number_format($totalPages) ?></span>
+        <?php if ($page < $totalPages): ?><a href="<?= View::e($historyPageUrl($page + 1)) ?>">التالي</a><?php endif; ?>
+      </nav>
     <?php endif; ?>
   </section>
 </section>

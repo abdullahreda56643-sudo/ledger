@@ -23,11 +23,33 @@
     const total = form.querySelector('[data-total]');
     const totalDirection = form.querySelector('[data-total-direction]');
     let balance = null;
+    let balanceRequest = 0;
 
     const selectedType = () => radios.find((radio) => radio.checked)?.value || 'sell';
+    const filterParties = () => {
+      const type = selectedType();
+      const query = search.value.trim().toLocaleLowerCase();
+      let selectedPartyIsInvalid = false;
+      [...partySelect.options].forEach((option, index) => {
+        if (index === 0) return;
+        const supportsType = (option.dataset.operations || '').split(' ').includes(type);
+        const matchesSearch = query === '' || option.dataset.search.toLocaleLowerCase().includes(query);
+        option.disabled = !supportsType;
+        option.hidden = !supportsType || !matchesSearch;
+        if (option.selected && !supportsType) selectedPartyIsInvalid = true;
+      });
+      if (selectedPartyIsInvalid) {
+        balanceRequest += 1;
+        partySelect.value = '';
+        balance = null;
+        currentBalance.textContent = 'اختر طرفًا';
+        currentBalance.className = 'text-muted';
+      }
+    };
     const refreshType = () => {
       const type = selectedType();
       const usesWeight = type === 'sell' || type === 'supply';
+      filterParties();
       radios.forEach((radio) => radio.closest('.operation-type')?.classList.toggle('is-selected', radio.checked));
       weightFields.classList.toggle('hidden', !usesWeight);
       amountFields.classList.toggle('hidden', usesWeight);
@@ -60,6 +82,7 @@
       nextBalance.className = next > 0 ? 'text-debit' : next < 0 ? 'text-credit' : 'text-muted';
     };
     const refreshBalance = async () => {
+      const requestId = ++balanceRequest;
       const id = partySelect.value;
       balance = null;
       currentBalance.className = 'text-muted';
@@ -70,12 +93,14 @@
         const response = await fetch(appUrl(`/api/parties/${encodeURIComponent(id)}/balance`), { headers: { Accept: 'application/json' } });
         if (!response.ok) throw new Error('تعذر جلب الرصيد');
         const data = await response.json();
+        if (requestId !== balanceRequest || partySelect.value !== id) return;
         balance = Number(data.balance) || 0;
         const label = balance > 0 ? `عليه ${money(balance)}` : balance < 0 ? `له ${money(balance)}` : 'متزن';
         currentBalance.textContent = `${label} جنيه`;
         currentBalance.className = balance > 0 ? 'text-debit' : balance < 0 ? 'text-credit' : 'text-muted';
         updatePreview();
       } catch {
+        if (requestId !== balanceRequest || partySelect.value !== id) return;
         currentBalance.textContent = 'تعذر تحميل الرصيد';
         currentBalance.className = 'text-warning';
       }
@@ -83,12 +108,7 @@
     radios.forEach((radio) => radio.addEventListener('change', refreshType));
     form.querySelectorAll('[data-weight], [data-price], [data-amount], [data-pay-now]').forEach((input) => input.addEventListener('input', updatePreview));
     partySelect.addEventListener('change', refreshBalance);
-    search.addEventListener('input', () => {
-      const query = search.value.trim().toLocaleLowerCase();
-      [...partySelect.options].forEach((option, index) => {
-        if (index > 0) option.hidden = query !== '' && !option.dataset.search.toLocaleLowerCase().includes(query);
-      });
-    });
+    search.addEventListener('input', filterParties);
     refreshType();
     if (partySelect.value) refreshBalance();
   }

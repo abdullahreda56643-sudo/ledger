@@ -23,16 +23,15 @@ final class ReportController
                                                WHEN t.is_void = 0 AND t.direction = \'credit\' THEN -t.amount
                                                ELSE 0 END), 0) AS balance
                 FROM parties p LEFT JOIN transactions t ON t.party_id = p.id
-                WHERE p.is_active = 1 GROUP BY p.id
+                GROUP BY p.id
              ) balances'
         )->fetch(PDO::FETCH_ASSOC);
         $parties = $pdo->query(
-            'SELECT p.id, p.name, p.phone,
+            'SELECT p.id, p.name, p.phone, p.is_active,
                     COALESCE(SUM(CASE WHEN t.is_void = 0 AND t.direction = \'debit\' THEN t.amount
                                       WHEN t.is_void = 0 AND t.direction = \'credit\' THEN -t.amount
                                       ELSE 0 END), 0) AS balance
              FROM parties p LEFT JOIN transactions t ON t.party_id = p.id
-             WHERE p.is_active = 1
              GROUP BY p.id HAVING balance > 0 ORDER BY balance DESC, p.name'
         )->fetchAll(PDO::FETCH_ASSOC);
         $maxBalance = $parties === [] ? 0 : (int) $parties[0]['balance'];

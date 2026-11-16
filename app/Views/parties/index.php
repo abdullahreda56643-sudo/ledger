@@ -31,6 +31,7 @@ $filters = [
     'debtors' => 'عليهم رصيد',
 ];
 $kindLabels = ['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'عميل ومورد'];
+$today = date('Y-m-d');
 ?>
 <section class="parties-page" aria-label="إدارة الأطراف">
   <div class="parties-intro">
@@ -151,6 +152,7 @@ $kindLabels = ['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'ع
                       <form action="<?= View::e(Url::to('/parties/' . $partyId . '/opening')) ?>" method="post" class="party-action-form">
                         <input type="hidden" name="_csrf" value="<?= View::e(Csrf::token()) ?>">
                         <label>المبلغ بالجنيه<input required name="amount" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+                        <label>تاريخ الرصيد<input required name="tx_date" type="date" max="<?= View::e($today) ?>" value="<?= View::e($today) ?>"></label>
                         <label>ملاحظة (اختياري)<input name="note" maxlength="255"></label>
                         <label>اتجاه الرصيد<span class="party-select-wrap"><select name="direction"><option value="debit">عليه (مدين)</option><option value="credit">له (دائن)</option></select></span></label>
                         <button type="submit">إضافة الرصيد</button>

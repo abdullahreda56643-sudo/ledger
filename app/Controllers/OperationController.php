@@ -11,6 +11,7 @@ use App\Core\View;
 use App\Models\Party;
 use App\Models\Transaction;
 use App\Services\AuditService;
+use App\Services\OperationPolicy;
 
 final class OperationController
 {
@@ -20,10 +21,45 @@ final class OperationController
     public function index(): void
     {
         Auth::requireAuth();
+        $today = date('Y-m-d');
+        $from = Input::string($_GET, 'from', $today);
+        $to = Input::string($_GET, 'to', $today);
+        $fromDate = preg_match('/^\d{4}-\d{2}-\d{2}$/D', $from) === 1
+            ? \DateTimeImmutable::createFromFormat('!Y-m-d', $from)
+            : false;
+        $toDate = preg_match('/^\d{4}-\d{2}-\d{2}$/D', $to) === 1
+            ? \DateTimeImmutable::createFromFormat('!Y-m-d', $to)
+            : false;
+        $errors = Http::takeFlash('errors', []);
+        if (!$fromDate || !$toDate || $fromDate->format('Y-m-d') !== $from
+            || $toDate->format('Y-m-d') !== $to || $from < '1000-01-01' || $to < '1000-01-01'
+            || $from > $to || $to > $today) {
+            $errors[] = 'حدد فترة زمنية صحيحة لا تتجاوز اليوم.';
+            $from = $today;
+            $to = $today;
+        }
+
+        $page = filter_var(Input::string($_GET, 'page', '1'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $page = $page === false ? 1 : $page;
+        $perPage = 50;
+        $page = min($page, intdiv(PHP_INT_MAX, $perPage));
+        $result = Transaction::paginateForPeriod($from, $to, $perPage, ($page - 1) * $perPage);
+        $totalPages = max(1, (int) ceil($result['total'] / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+            $result = Transaction::paginateForPeriod($from, $to, $perPage, ($page - 1) * $perPage);
+        }
+
         View::render('operation/index', [
             'parties' => Party::active(),
-            'transactions' => Transaction::today(),
-            'errors' => Http::takeFlash('errors', []),
+            'transactions' => $result['items'],
+            'totalTransactions' => $result['total'],
+            'from' => $from,
+            'to' => $to,
+            'page' => $page,
+            'perPage' => $perPage,
+            'totalPages' => $totalPages,
+            'errors' => $errors,
             'old' => Http::takeFlash('old', []),
             'success' => Http::takeFlash('success'),
             'pageTitle' => 'التشغيل اليومي',
@@ -43,12 +79,17 @@ final class OperationController
         }
         if ($party === null || (int) $party['is_active'] !== 1) {
             $errors[] = 'اختر طرفًا نشطًا صحيحًا.';
+        } elseif (in_array($type, self::OPERATION_TYPES, true)
+            && !OperationPolicy::supports((string) $party['kind'], $type)) {
+            $errors[] = 'نوع الحركة لا يتوافق مع نوع الطرف.';
         }
 
         $today = date('Y-m-d');
         $date = Input::string($_POST, 'tx_date', $today);
-        $validDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
-        if (!$validDate || $validDate->format('Y-m-d') !== $date || $date > $today) {
+        $validDate = preg_match('/^\d{4}-\d{2}-\d{2}$/D', $date) === 1
+            ? \DateTimeImmutable::createFromFormat('!Y-m-d', $date)
+            : false;
+        if (!$validDate || $validDate->format('Y-m-d') !== $date || $date < '1000-01-01' || $date > $today) {
             $errors[] = 'تاريخ الحركة غير صحيح.';
         } elseif ((Auth::user()['role'] ?? '') === 'worker' && $date !== $today) {
             $errors[] = 'العامل يستطيع تسجيل حركات بتاريخ اليوم فقط.';

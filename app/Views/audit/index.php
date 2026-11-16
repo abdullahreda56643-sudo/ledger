@@ -35,10 +35,16 @@ $fieldLabels = [
     'note' => 'ملاحظة',
     'reason' => 'سبب الإلغاء',
     'role' => 'الصلاحية',
+    'tx_date' => 'تاريخ الحركة',
 ];
 $kindLabels = ['customer' => 'عميل', 'supplier' => 'مورد', 'both' => 'عميل ومورد'];
 $roleLabels = ['owner' => 'مالك النظام', 'worker' => 'عامل'];
 $entryCount = count($entries);
+$firstRecord = $totalEntries > 0 ? (($page - 1) * $perPage) + 1 : 0;
+$lastRecord = min($page * $perPage, $totalEntries);
+$auditPageUrl = static function (int $targetPage): string {
+    return Url::to('/audit?' . http_build_query(['page' => $targetPage]));
+};
 $actionCounts = [];
 foreach ($entries as $entry) {
     $actionCounts[$entry['action']] = ($actionCounts[$entry['action']] ?? 0) + 1;
@@ -75,7 +81,7 @@ $formatDetail = static function (string $key, mixed $value) use ($fieldLabels, $
       <span class="audit-eyebrow">متابعة النظام</span>
       <p>راجع التغييرات والأنشطة التي نفذها المستخدمون.</p>
     </div>
-    <span class="audit-limit">آخر <?= number_format($entryCount) ?> من 500 نشاط</span>
+    <span class="audit-limit"><?= number_format($firstRecord) ?>–<?= number_format($lastRecord) ?> من <?= number_format($totalEntries) ?> نشاط</span>
   </div>
 
   <div class="audit-overview" aria-label="ملخص سجل التدقيق">
@@ -83,19 +89,19 @@ $formatDetail = static function (string $key, mixed $value) use ($fieldLabels, $
       <span class="audit-stat-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v13H4zM8 9h8M8 13h5"/></svg>
       </span>
-      <span><small>الأنشطة المعروضة</small><strong><?= number_format($entryCount) ?></strong></span>
+      <span><small>الأنشطة في هذه الصفحة</small><strong><?= number_format($entryCount) ?></strong></span>
     </article>
     <article class="audit-stat">
       <span class="audit-stat-icon audit-stat-people" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.25"/><path d="M3.75 19v-1.5A3.5 3.5 0 0 1 7.25 14h3.5a3.5 3.5 0 0 1 3.5 3.5V19ZM16 5.2a3.25 3.25 0 0 1 0 6.3"/></svg>
       </span>
-      <span><small>مستخدمون نفذوا أنشطة</small><strong><?= number_format(count(array_unique(array_filter(array_column($entries, 'user_name'))))) ?></strong></span>
+      <span><small>مستخدمون في هذه الصفحة</small><strong><?= number_format(count(array_unique(array_filter(array_column($entries, 'user_name'))))) ?></strong></span>
     </article>
     <article class="audit-stat">
       <span class="audit-stat-icon audit-stat-latest" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>
       </span>
-      <span><small>أكثر نشاط تكرارًا</small><strong class="audit-stat-text"><?= $topAction !== null ? View::e($actionLabels[$topAction] ?? $topAction) : 'لا يوجد' ?></strong></span>
+      <span><small>الأكثر تكرارًا في الصفحة</small><strong class="audit-stat-text"><?= $topAction !== null ? View::e($actionLabels[$topAction] ?? $topAction) : 'لا يوجد' ?></strong></span>
     </article>
   </div>
 
@@ -173,6 +179,14 @@ $formatDetail = static function (string $key, mixed $value) use ($fieldLabels, $
           </li>
         <?php endforeach; ?>
       </ol>
+    <?php endif; ?>
+
+    <?php if ($totalPages > 1): ?>
+      <nav class="audit-pagination" aria-label="صفحات سجل الأنشطة">
+        <?php if ($page > 1): ?><a href="<?= View::e($auditPageUrl($page - 1)) ?>">السابق</a><?php endif; ?>
+        <span>صفحة <?= number_format($page) ?> من <?= number_format($totalPages) ?></span>
+        <?php if ($page < $totalPages): ?><a href="<?= View::e($auditPageUrl($page + 1)) ?>">التالي</a><?php endif; ?>
+      </nav>
     <?php endif; ?>
   </section>
 </section>

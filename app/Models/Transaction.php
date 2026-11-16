@@ -37,6 +37,33 @@ final class Transaction
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function paginateForPeriod(string $from, string $to, int $limit, int $offset): array
+    {
+        $pdo = Database::connection();
+        $countStatement = $pdo->prepare(
+            'SELECT COUNT(*) FROM transactions WHERE tx_date >= :from_date AND tx_date <= :to_date'
+        );
+        $countStatement->execute(['from_date' => $from, 'to_date' => $to]);
+        $total = (int) $countStatement->fetchColumn();
+
+        $statement = $pdo->prepare(
+            'SELECT t.*, p.name AS party_name, u.name AS creator_name
+             FROM transactions t
+             JOIN parties p ON p.id = t.party_id
+             JOIN users u ON u.id = t.created_by
+             WHERE t.tx_date >= :from_date AND t.tx_date <= :to_date
+             ORDER BY t.tx_date DESC, t.id DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $statement->bindValue(':from_date', $from, PDO::PARAM_STR);
+        $statement->bindValue(':to_date', $to, PDO::PARAM_STR);
+        $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $statement->execute();
+
+        return ['items' => $statement->fetchAll(PDO::FETCH_ASSOC), 'total' => $total];
+    }
+
     public static function find(int $id): ?array
     {
         $statement = Database::connection()->prepare('SELECT * FROM transactions WHERE id = :id LIMIT 1');

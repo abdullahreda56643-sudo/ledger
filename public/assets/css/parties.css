@@ -190,6 +190,7 @@
 
 .party-search {
   display: flex;
+  position: relative;
   min-width: 0;
   min-height: 50px;
   align-items: center;
@@ -207,8 +208,8 @@
   box-shadow: 0 0 0 4px var(--party-ring);
 }
 
-.party-search > svg { width: 19px; height: 19px; flex: 0 0 auto; color: var(--party-muted); }
-.party-search input { width: 100%; min-width: 0; height: 40px; border: 0; outline: 0; background: transparent; color: var(--party-text); font: inherit; font-size: 14px; font-weight: 500; }
+.party-search > svg { position: absolute; inset-inline-start: 14px; top: 50%; width: 19px; height: 19px; color: var(--party-muted); transform: translateY(-50%); }
+.party-search input { width: 100%; min-width: 0; height: 40px; border: 0; outline: 0; background: transparent; padding-inline-start: 42px; color: var(--party-text); font: inherit; font-size: 14px; font-weight: 500; }
 .party-search input::placeholder { color: var(--party-muted); opacity: .85; }
 
 .party-search button {

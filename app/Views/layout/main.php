@@ -58,10 +58,10 @@ $icons = [
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <?php if ($currentPath === '/'): ?>
-    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/operation.css?v=3')) ?>">
+    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/operation.css?v=4')) ?>">
   <?php endif; ?>
   <?php if (str_starts_with($currentPath, '/parties')): ?>
-    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/parties.css?v=3')) ?>">
+    <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/parties.css?v=4')) ?>">
   <?php endif; ?>
   <?php if ($currentPath === '/reports/debtors'): ?>
     <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/reports.css')) ?>">
@@ -72,7 +72,7 @@ $icons = [
   <?php if ($currentPath === '/audit'): ?>
     <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/audit.css')) ?>">
   <?php endif; ?>
-  <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/print.css')) ?>">
+  <link rel="stylesheet" href="<?= View::e(Url::to('/assets/css/print.css?v=3')) ?>">
   <script defer src="<?= View::e(Url::to('/assets/js/app.js?v=2')) ?>"></script>
   <style>
     /* ==========================================================
@@ -122,7 +122,7 @@ $icons = [
       --shell-shadow: 0 12px 32px rgb(0 0 0 / 30%);
     }
 
-    html { min-width: 320px; font-family: 'IBM Plex Sans Arabic', 'Tajawal', ui-sans-serif, system-ui, sans-serif; }
+    html { min-width: 0; font-family: 'IBM Plex Sans Arabic', 'Tajawal', ui-sans-serif, system-ui, sans-serif; }
     body { min-height: 100vh; background: var(--shell-background); color: var(--shell-text); font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
     ::selection { background: rgb(14 107 92 / 22%); }
     .dark ::selection { background: rgb(86 201 173 / 28%); }

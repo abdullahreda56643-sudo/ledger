@@ -210,6 +210,16 @@
 .debtor-name:hover { color: var(--report-primary); text-decoration: underline; text-underline-offset: 3px; }
 .debtor-phone { width: fit-content; color: var(--report-muted); font-size: 12px; text-decoration: none; }
 .debtor-phone:hover { color: var(--report-primary); }
+.debtor-status {
+  width: fit-content;
+  border: 1px solid var(--report-border);
+  border-radius: 99px;
+  background: var(--report-surface-2);
+  padding: 2px 7px;
+  color: var(--report-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
 .debtor-balance { flex: 0 0 auto; color: var(--report-debit); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 .debtor-progress { grid-column: 2; height: 6px; overflow: hidden; border-radius: 99px; background: var(--report-surface-2); }

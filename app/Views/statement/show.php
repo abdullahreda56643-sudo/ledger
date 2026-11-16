@@ -72,11 +72,11 @@ $closingBalance = (int) $statement['closing_balance'];
         </thead>
         <tbody>
           <tr class="statement-opening">
-            <td>—</td>
-            <td>رصيد أول الفترة</td>
-            <td>—</td>
-            <td>—</td>
-            <td class="<?= Formatter::balanceClass($openingBalance) ?>"><?= View::e(Formatter::balanceLabel($openingBalance)) ?></td>
+            <td data-label="التاريخ">—</td>
+            <td data-label="البيان">رصيد أول الفترة</td>
+            <td data-label="عليه">—</td>
+            <td data-label="له">—</td>
+            <td data-label="الرصيد" class="<?= Formatter::balanceClass($openingBalance) ?>"><?= View::e(Formatter::balanceLabel($openingBalance)) ?></td>
           </tr>
           <?php if ($statement['rows'] === []): ?>
             <tr class="statement-empty">
@@ -90,19 +90,19 @@ $closingBalance = (int) $statement['closing_balance'];
               $isToday = $row['tx_date'] === date('Y-m-d');
             ?>
             <tr class="<?= $void ? 'statement-void' : '' ?> <?= $isToday && !$void ? 'statement-today' : '' ?>">
-              <td class="statement-nowrap">
+              <td class="statement-nowrap" data-label="التاريخ">
                 <?= View::e($row['tx_date']) ?>
                 <?php if ($isToday): ?><span class="statement-today-label">اليوم</span><?php endif; ?>
               </td>
-              <td class="statement-description">
+              <td class="statement-description" data-label="البيان">
                 <span class="statement-transaction-type"><?= View::e(Formatter::type($row['type'])) ?></span>
                 <?php if ($row['weight'] !== null): ?><small><?= View::e($row['weight']) ?> كجم × <?= View::e(Formatter::money($row['unit_price'])) ?> جنيه</small><?php endif; ?>
                 <?php if ($row['note']): ?><small><?= View::e($row['note']) ?></small><?php endif; ?>
                 <?php if ($void): ?><small class="statement-void-label">حركة ملغاة</small><?php endif; ?>
               </td>
-              <td class="statement-nowrap"><?= !$void && $row['direction'] === 'debit' ? View::e(Formatter::money($row['amount'])) : '—' ?></td>
-              <td class="statement-nowrap"><?= !$void && $row['direction'] === 'credit' ? View::e(Formatter::money($row['amount'])) : '—' ?></td>
-              <td class="<?= Formatter::balanceClass($balance) ?>"><?= View::e(Formatter::balanceLabel($balance)) ?></td>
+              <td class="statement-nowrap" data-label="عليه"><?= !$void && $row['direction'] === 'debit' ? View::e(Formatter::money($row['amount'])) : '—' ?></td>
+              <td class="statement-nowrap" data-label="له"><?= !$void && $row['direction'] === 'credit' ? View::e(Formatter::money($row['amount'])) : '—' ?></td>
+              <td data-label="الرصيد" class="<?= Formatter::balanceClass($balance) ?>"><?= View::e(Formatter::balanceLabel($balance)) ?></td>
             </tr>
           <?php endforeach; ?>
         </tbody>

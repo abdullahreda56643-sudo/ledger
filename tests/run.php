@@ -8,6 +8,7 @@ use App\Core\Formatter;
 use App\Core\Router;
 use App\Core\Url;
 use App\Core\View;
+use App\Services\OperationPolicy;
 
 $tests = [];
 $assertSame = static function (mixed $expected, mixed $actual, string $message): void {
@@ -58,6 +59,19 @@ $tests['transaction types have Arabic labels'] = static function () use ($assert
     $assertSame('سحب', Formatter::type('sell'), 'Sell label is incorrect.');
     $assertSame('دفعة من الطرف', Formatter::type('pay'), 'Payment label is incorrect.');
     $assertSame('unknown', Formatter::type('unknown'), 'Unknown types should remain visible.');
+};
+
+$tests['operation policy matches movement types to party types'] = static function () use ($assertSame): void {
+    $assertSame(true, OperationPolicy::supports('customer', 'sell'), 'Customers should allow sales.');
+    $assertSame(true, OperationPolicy::supports('customer', 'pay'), 'Customers should allow payments.');
+    $assertSame(false, OperationPolicy::supports('customer', 'supply'), 'Customers should not allow supply movements.');
+    $assertSame(false, OperationPolicy::supports('customer', 'pay_supplier'), 'Customers should not allow supplier payments.');
+    $assertSame(true, OperationPolicy::supports('supplier', 'supply'), 'Suppliers should allow supply movements.');
+    $assertSame(true, OperationPolicy::supports('supplier', 'pay_supplier'), 'Suppliers should allow supplier payments.');
+    $assertSame(false, OperationPolicy::supports('supplier', 'sell'), 'Suppliers should not allow sales.');
+    $assertSame(true, OperationPolicy::supports('both', 'sell'), 'Mixed parties should allow customer movements.');
+    $assertSame(true, OperationPolicy::supports('both', 'supply'), 'Mixed parties should allow supplier movements.');
+    $assertSame(false, OperationPolicy::supports('unknown', 'sell'), 'Unknown party types should be rejected.');
 };
 
 $tests['HTML output escapes unsafe content'] = static function () use ($assertSame): void {

@@ -167,8 +167,13 @@ final class PartyController
         $amount = self::parseMoney($_POST['amount'] ?? null);
         $direction = Input::string($_POST, 'direction');
         $note = trim(Input::string($_POST, 'note'));
+        $date = Input::string($_POST, 'tx_date', date('Y-m-d'));
+        $validDate = preg_match('/^\d{4}-\d{2}-\d{2}$/D', $date) === 1
+            ? \DateTimeImmutable::createFromFormat('!Y-m-d', $date)
+            : false;
         if ($party === null || (int) $party['is_active'] !== 1 || $amount === null || $amount <= 0
-            || $amount > 1000000000 || !in_array($direction, ['debit', 'credit'], true) || mb_strlen($note) > 255) {
+            || $amount > 1000000000 || !in_array($direction, ['debit', 'credit'], true) || mb_strlen($note) > 255
+            || !$validDate || $validDate->format('Y-m-d') !== $date || $date < '1000-01-01' || $date > date('Y-m-d')) {
             Http::flash('errors', ['بيانات الرصيد الافتتاحي غير صحيحة.']);
             Http::redirect('/parties');
         }
@@ -178,7 +183,7 @@ final class PartyController
         try {
             $transactionId = Transaction::create([
                 'party_id' => (int) $id,
-                'tx_date' => date('Y-m-d'),
+                'tx_date' => $date,
                 'type' => 'opening',
                 'direction' => $direction,
                 'weight' => null,
@@ -192,6 +197,7 @@ final class PartyController
                 'party_id' => (int) $id,
                 'direction' => $direction,
                 'amount' => $amount,
+                'tx_date' => $date,
             ]);
             $pdo->commit();
         } catch (\Throwable $exception) {
